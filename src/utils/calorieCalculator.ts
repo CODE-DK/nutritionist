@@ -6,26 +6,27 @@
  */
 
 import i18n from '../config/i18n';
+
 import type { Gender, ActivityLevel, GoalType } from '../types';
 
 /**
  * Коэффициенты активности для расчета TDEE
  */
 const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
-  sedentary: 1.2,      // Сидячий образ жизни, минимум движения
-  light: 1.375,        // Легкие упражнения 1-3 раза в неделю
-  moderate: 1.55,      // Умеренные упражнения 3-5 раз в неделю
-  active: 1.725,       // Интенсивные упражнения 6-7 раз в неделю
-  very_active: 1.9,    // Очень интенсивные упражнения, физическая работа
+  sedentary: 1.2, // Сидячий образ жизни, минимум движения
+  light: 1.375, // Легкие упражнения 1-3 раза в неделю
+  moderate: 1.55, // Умеренные упражнения 3-5 раз в неделю
+  active: 1.725, // Интенсивные упражнения 6-7 раз в неделю
+  very_active: 1.9, // Очень интенсивные упражнения, физическая работа
 };
 
 /**
  * Процент корректировки калорий в зависимости от цели
  */
 const GOAL_ADJUSTMENTS: Record<GoalType, number> = {
-  lose_weight: -0.2,   // Дефицит 20% для похудения
-  maintain: 0,         // Поддержание текущего веса
-  gain_weight: 0.1,    // Профицит 10% для набора массы
+  lose_weight: -0.2, // Дефицит 20% для похудения
+  maintain: 0, // Поддержание текущего веса
+  gain_weight: 0.1, // Профицит 10% для набора массы
 };
 
 /**
@@ -40,12 +41,7 @@ const GOAL_ADJUSTMENTS: Record<GoalType, number> = {
  * @param gender - пол
  * @returns базовый метаболизм (калории в день)
  */
-export function calculateBMR(
-  weight: number,
-  height: number,
-  age: number,
-  gender: Gender
-): number {
+export function calculateBMR(weight: number, height: number, age: number, gender: Gender): number {
   const baseCalc = 10 * weight + 6.25 * height - 5 * age;
   const genderOffset = gender === 'male' ? 5 : -161;
   return Math.round(baseCalc + genderOffset);

@@ -1,21 +1,17 @@
 // PhotoCaptureModal - модальное окно для захвата и анализа фото еды
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
+
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, Alert } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import Button from './Button';
 import Loading from './Loading';
 import { Typography, BorderRadius, Spacing, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 import photoService from '../services/photoService';
+
 import type { PhotoAnalysisResult } from '../types';
 
 interface PhotoCaptureModalProps {
@@ -39,49 +35,75 @@ export default function PhotoCaptureModal({
   const [error, setError] = useState<string>('');
 
   const styles = StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
+    content: {
       alignItems: 'center',
-    },
-    modalContainer: {
-      backgroundColor: theme.white,
-      borderRadius: BorderRadius.large,
-      width: '90%',
-      maxHeight: '80%',
-      ...Shadows.level3,
+      padding: Spacing.lg,
     },
     header: {
+      alignItems: 'center',
+      borderBottomColor: theme.border,
+      borderBottomWidth: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
     },
     headerTitle: {
       ...Typography.h3,
       color: theme.text,
     },
-    content: {
-      padding: Spacing.lg,
-      alignItems: 'center',
-    },
     // Idle state - выбор источника
-    sourceContainer: {
-      width: '100%',
+    button: {
+      flex: 1,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
       gap: Spacing.md,
+      width: '100%',
+    },
+    modalContainer: {
+      backgroundColor: theme.white,
+      borderRadius: BorderRadius.large,
+      maxHeight: '80%',
+      width: '90%',
+      ...Shadows.level3,
+    },
+    overlay: {
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      flex: 1,
+      justifyContent: 'center',
+    },
+    // Preview state - показ фото
+    photoImage: {
+      height: '100%',
+      resizeMode: 'cover',
+      width: '100%',
+    },
+    photoPreview: {
+      backgroundColor: theme.border,
+      borderRadius: BorderRadius.medium,
+      height: 300,
+      marginBottom: Spacing.lg,
+      overflow: 'hidden',
+      width: '100%',
     },
     sourceButton: {
-      flexDirection: 'row',
       alignItems: 'center',
-      padding: Spacing.lg,
+      backgroundColor: theme.white,
+      borderColor: theme.border,
       borderRadius: BorderRadius.medium,
       borderWidth: 2,
-      borderColor: theme.border,
-      backgroundColor: theme.white,
+      flexDirection: 'row',
+      padding: Spacing.lg,
+    },
+    sourceContainer: {
+      gap: Spacing.md,
+      width: '100%',
+    },
+    sourceDescription: {
+      ...Typography.caption,
+      color: theme.textSecondary,
     },
     sourceIcon: {
       marginRight: Spacing.md,
@@ -91,35 +113,9 @@ export default function PhotoCaptureModal({
     },
     sourceTitle: {
       ...Typography.bodyLarge,
-      fontWeight: '600',
       color: theme.text,
+      fontWeight: '600',
       marginBottom: Spacing.xs,
-    },
-    sourceDescription: {
-      ...Typography.caption,
-      color: theme.textSecondary,
-    },
-    // Preview state - показ фото
-    photoPreview: {
-      width: '100%',
-      height: 300,
-      borderRadius: BorderRadius.medium,
-      backgroundColor: theme.border,
-      marginBottom: Spacing.lg,
-      overflow: 'hidden',
-    },
-    photoImage: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'cover',
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      gap: Spacing.md,
-      width: '100%',
-    },
-    button: {
-      flex: 1,
     },
     // Analyzing state
     analyzingContainer: {
@@ -149,8 +145,8 @@ export default function PhotoCaptureModal({
     errorText: {
       ...Typography.body,
       color: theme.error,
-      textAlign: 'center',
       marginBottom: Spacing.lg,
+      textAlign: 'center',
     },
   });
 
@@ -236,33 +232,19 @@ export default function PhotoCaptureModal({
         return (
           <View style={styles.sourceContainer}>
             <TouchableOpacity style={styles.sourceButton} onPress={handleCameraPress}>
-              <Ionicons
-                name="camera"
-                size={32}
-                color={theme.primary}
-                style={styles.sourceIcon}
-              />
+              <Ionicons name="camera" size={32} color={theme.primary} style={styles.sourceIcon} />
               <View style={styles.sourceTextContainer}>
                 <Text style={styles.sourceTitle}>📷 Камера</Text>
-                <Text style={styles.sourceDescription}>
-                  Сфотографировать еду прямо сейчас
-                </Text>
+                <Text style={styles.sourceDescription}>Сфотографировать еду прямо сейчас</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.sourceButton} onPress={handleGalleryPress}>
-              <Ionicons
-                name="images"
-                size={32}
-                color={theme.primary}
-                style={styles.sourceIcon}
-              />
+              <Ionicons name="images" size={32} color={theme.primary} style={styles.sourceIcon} />
               <View style={styles.sourceTextContainer}>
                 <Text style={styles.sourceTitle}>🖼 Галерея</Text>
-                <Text style={styles.sourceDescription}>
-                  Выбрать готовое фото из галереи
-                </Text>
+                <Text style={styles.sourceDescription}>Выбрать готовое фото из галереи</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
@@ -283,11 +265,7 @@ export default function PhotoCaptureModal({
                 variant="secondary"
                 style={styles.button}
               />
-              <Button
-                title="Анализировать"
-                onPress={handleAnalyze}
-                style={styles.button}
-              />
+              <Button title="Анализировать" onPress={handleAnalyze} style={styles.button} />
             </View>
           </>
         );
@@ -296,24 +274,15 @@ export default function PhotoCaptureModal({
         return (
           <View style={styles.analyzingContainer}>
             <Loading text="" />
-            <Text style={styles.analyzingText}>
-              Анализируем фото с помощью AI...
-            </Text>
-            <Text style={styles.analyzingHint}>
-              Обычно занимает 2-4 секунды
-            </Text>
+            <Text style={styles.analyzingText}>Анализируем фото с помощью AI...</Text>
+            <Text style={styles.analyzingHint}>Обычно занимает 2-4 секунды</Text>
           </View>
         );
 
       case 'error':
         return (
           <View style={styles.errorContainer}>
-            <Ionicons
-              name="close-circle"
-              size={64}
-              color={theme.error}
-              style={styles.errorIcon}
-            />
+            <Ionicons name="close-circle" size={64} color={theme.error} style={styles.errorIcon} />
             <Text style={styles.errorText}>{error}</Text>
 
             <View style={styles.buttonContainer}>
@@ -323,11 +292,7 @@ export default function PhotoCaptureModal({
                 variant="secondary"
                 style={styles.button}
               />
-              <Button
-                title="Ввести вручную"
-                onPress={handleManualInput}
-                style={styles.button}
-              />
+              <Button title="Ввести вручную" onPress={handleManualInput} style={styles.button} />
             </View>
           </View>
         );
@@ -338,12 +303,7 @@ export default function PhotoCaptureModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent={true}
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={handleClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}

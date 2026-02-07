@@ -7,16 +7,40 @@ export type SubscriptionType = 'free' | 'premium';
 export type Gender = 'male' | 'female';
 
 export type ActivityLevel =
-  | 'sedentary'      // Сидячий образ жизни
-  | 'light'          // Легкая активность (1-3 тренировки в неделю)
-  | 'moderate'       // Средняя активность (3-5 тренировок в неделю)
-  | 'active'         // Высокая активность (6-7 тренировок в неделю)
-  | 'very_active';   // Очень высокая активность (2 тренировки в день)
+  | 'sedentary' // Сидячий образ жизни
+  | 'light' // Легкая активность (1-3 тренировки в неделю)
+  | 'moderate' // Средняя активность (3-5 тренировок в неделю)
+  | 'active' // Высокая активность (6-7 тренировок в неделю)
+  | 'very_active'; // Очень высокая активность (2 тренировки в день)
 
 export type GoalType =
-  | 'lose_weight'    // Похудение
-  | 'maintain'       // Поддержание веса
-  | 'gain_weight';   // Набор массы
+  | 'lose_weight' // Похудение
+  | 'maintain' // Поддержание веса
+  | 'gain_weight'; // Набор массы
+
+export type DietType =
+  | 'balanced' // Сбалансированное питание
+  | 'calorie_deficit' // Дефицит калорий
+  | 'keto' // Кето-диета
+  | 'low_carb' // Низкоуглеводная
+  | 'high_protein' // Высокобелковая
+  | 'mediterranean' // Средиземноморская
+  | 'intermittent_fasting' // Интервальное голодание
+  | 'paleo' // Палео
+  | 'vegan' // Веганская
+  | 'vegetarian'; // Вегетарианская
+
+export type TipCategory = 'nutrition' | 'hydration' | 'meal_timing' | 'food_benefits' | 'general';
+
+export interface DailyTip {
+  id: string;
+  category: TipCategory;
+  dietTypes: DietType[]; // Для каких диет подходит
+  goalTypes?: GoalType[]; // Для каких целей (опционально)
+  title: string; // Заголовок совета
+  text: string; // Текст совета
+  emoji?: string; // Эмодзи для визуала
+}
 
 export interface User {
   id: string;
@@ -25,18 +49,22 @@ export interface User {
   subscription: SubscriptionType;
 
   // Физические параметры
-  height?: number;              // Рост в см
-  weight?: number;              // Текущий вес в кг
-  age?: number;                 // Возраст в годах
-  gender?: Gender;              // Пол
+  height?: number; // Рост в см
+  weight?: number; // Текущий вес в кг
+  age?: number; // Возраст в годах
+  gender?: Gender; // Пол
 
   // Цели и активность
-  activityLevel?: ActivityLevel;  // Уровень активности
-  goalType?: GoalType;            // Цель пользователя
-  targetWeight?: number;          // Целевой вес в кг
+  activityLevel?: ActivityLevel; // Уровень активности
+  goalType?: GoalType; // Цель пользователя
+  targetWeight?: number; // Целевой вес в кг
+
+  // Питание
+  dietType?: DietType; // Тип диеты
+  showDailyTips?: boolean; // Показывать ежедневные советы
 
   // Калории
-  dailyCalorieGoal: number;       // Целевая норма калорий в день
+  dailyCalorieGoal: number; // Целевая норма калорий в день
 
   createdAt: string;
 }
@@ -90,10 +118,10 @@ export interface PhotoAnalysisResult {
   protein: number;
   carbs: number;
   fat: number;
-  confidence: number;  // 0.0 - 1.0
+  confidence: number; // 0.0 - 1.0
   reasoning: string;
-  photoUri: string;    // Local URI
-  photoUrl?: string;   // Storage URL (after upload)
+  photoUri: string; // Local URI
+  photoUrl?: string; // Storage URL (after upload)
 }
 
 export interface PhotoUsage {

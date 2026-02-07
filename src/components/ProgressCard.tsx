@@ -3,7 +3,9 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+
 import { View, Text, StyleSheet, Animated } from 'react-native';
+
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -69,9 +71,7 @@ export default function ProgressCard({
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
 
       {/* Тип цели */}
-      <Text style={[styles.goalText, { color: theme.text }]}>
-        {getGoalText()}
-      </Text>
+      <Text style={[styles.goalText, { color: theme.text }]}>{getGoalText()}</Text>
 
       {/* Progress Bar */}
       <View style={[styles.progressBarContainer, { backgroundColor: theme.background }]}>
@@ -97,14 +97,17 @@ export default function ProgressCard({
           <View style={styles.statItem}>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Темп:</Text>
             <Text style={[styles.statValue, { color: theme.text }]}>
-              {weeklyChange > 0 ? '+' : ''}{weeklyChange.toFixed(1)} {unit}/неделю
+              {weeklyChange > 0 ? '+' : ''}
+              {weeklyChange.toFixed(1)} {unit}/неделю
             </Text>
           </View>
 
           <View style={styles.statItem}>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>До цели:</Text>
             <Text style={[styles.statValue, { color: theme.text }]}>
-              {estimatedWeeks > 0 ? `~${estimatedWeeks} ${getWeeksLabel(estimatedWeeks)}` : 'Достигнута'}
+              {estimatedWeeks > 0
+                ? `~${estimatedWeeks} ${getWeeksLabel(estimatedWeeks)}`
+                : 'Достигнута'}
             </Text>
           </View>
         </View>
@@ -155,39 +158,36 @@ function getWeeksLabel(weeks: number): string {
 }
 
 const styles = StyleSheet.create({
+  arrow: {
+    paddingHorizontal: Spacing.md,
+  },
+  arrowIcon: {
+    color: '#9E9E9E',
+    fontSize: 24,
+  },
   card: {
-    padding: Spacing.md,
     borderRadius: BorderRadius.medium,
     marginBottom: Spacing.md,
-  },
-  title: {
-    ...Typography.h3,
-    marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   goalText: {
     ...Typography.bodyLarge,
     marginBottom: Spacing.md,
   },
-  progressBarContainer: {
-    height: 12,
-    borderRadius: BorderRadius.small,
-    overflow: 'hidden',
-    marginBottom: Spacing.sm,
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: BorderRadius.small,
-  },
   percentage: {
     ...Typography.body,
+    marginBottom: Spacing.md,
     textAlign: 'right',
-    marginBottom: Spacing.md,
   },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.md,
-    gap: Spacing.md,
+  progressBarContainer: {
+    borderRadius: BorderRadius.small,
+    height: 12,
+    marginBottom: Spacing.sm,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    borderRadius: BorderRadius.small,
+    height: '100%',
   },
   statItem: {
     flex: 1,
@@ -199,17 +199,19 @@ const styles = StyleSheet.create({
   statValue: {
     ...Typography.bodyLarge,
   },
-  weights: {
+  stats: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: Spacing.md,
     justifyContent: 'space-between',
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.05)',
+    marginBottom: Spacing.md,
+  },
+  title: {
+    ...Typography.h3,
+    marginBottom: Spacing.sm,
   },
   weightItem: {
-    flex: 1,
     alignItems: 'center',
+    flex: 1,
   },
   weightLabel: {
     ...Typography.caption,
@@ -218,11 +220,12 @@ const styles = StyleSheet.create({
   weightValue: {
     ...Typography.h3,
   },
-  arrow: {
-    paddingHorizontal: Spacing.md,
-  },
-  arrowIcon: {
-    fontSize: 24,
-    color: '#9E9E9E',
+  weights: {
+    alignItems: 'center',
+    borderTopColor: 'rgba(0, 0, 0, 0.05)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: Spacing.md,
   },
 });

@@ -1,6 +1,7 @@
 // AuthScreen - экран входа/регистрации
 
 import React, { useState } from 'react';
+
 import {
   View,
   Text,
@@ -10,14 +11,15 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { useAuth } from '../config/AuthContext';
 import { Typography, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
-import authService from '../services/authService';
-import analyticsService from '../services/analyticsService';
 
 interface AuthScreenProps {
   onAuthSuccess: () => void;
@@ -26,10 +28,10 @@ interface AuthScreenProps {
 export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { signIn, signUp, loading: authLoading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const validateForm = (): boolean => {
@@ -52,23 +54,17 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       return;
     }
 
-    setLoading(true);
-
     try {
       if (isLogin) {
-        await authService.signIn(email, password);
-        analyticsService.track('user_logged_in', { email });
+        await signIn(email, password);
       } else {
-        await authService.signUp(email, password);
-        analyticsService.track('user_registered', { email });
+        await signUp(email, password);
       }
 
       onAuthSuccess();
     } catch (error: any) {
       const errorTitle = isLogin ? t('auth.signInError') : t('auth.signUpError');
       Alert.alert(t('common.error'), error.message || errorTitle);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -79,16 +75,34 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.white,
-    },
-    keyboardView: {
       flex: 1,
     },
     content: {
-      padding: Spacing.lg,
       justifyContent: 'center',
       minHeight: '100%',
+      padding: Spacing.lg,
+    },
+    divider: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      marginVertical: Spacing.xl,
+    },
+    dividerLine: {
+      backgroundColor: theme.border,
+      flex: 1,
+      height: 1,
+    },
+    dividerText: {
+      ...Typography.caption,
+      color: theme.textSecondary,
+      marginHorizontal: Spacing.md,
+    },
+    form: {
+      marginBottom: Spacing.xl,
+    },
+    keyboardView: {
+      flex: 1,
     },
     logoContainer: {
       alignItems: 'center',
@@ -98,41 +112,23 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       fontSize: 80,
       marginBottom: Spacing.md,
     },
-    title: {
-      ...Typography.h2,
+    socialPlaceholder: {
+      ...Typography.caption,
+      color: theme.disabled,
       textAlign: 'center',
-      marginBottom: Spacing.xs,
+    },
+    submitButton: {
+      marginVertical: Spacing.md,
     },
     subtitle: {
       ...Typography.bodyLarge,
       color: theme.textSecondary,
       textAlign: 'center',
     },
-    form: {
-      marginBottom: Spacing.xl,
-    },
-    submitButton: {
-      marginVertical: Spacing.md,
-    },
-    divider: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: Spacing.xl,
-    },
-    dividerLine: {
-      flex: 1,
-      height: 1,
-      backgroundColor: theme.border,
-    },
-    dividerText: {
-      ...Typography.caption,
-      marginHorizontal: Spacing.md,
-      color: theme.textSecondary,
-    },
-    socialPlaceholder: {
-      ...Typography.caption,
+    title: {
+      ...Typography.h2,
+      marginBottom: Spacing.xs,
       textAlign: 'center',
-      color: theme.disabled,
     },
   });
 
@@ -180,7 +176,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
             <Button
               title={isLogin ? t('auth.signInButton') : t('auth.signUpButton')}
               onPress={handleSubmit}
-              loading={loading}
+              loading={authLoading}
               style={styles.submitButton}
             />
 
@@ -188,7 +184,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
               title={isLogin ? t('auth.dontHaveAccount') : t('auth.alreadyHaveAccount')}
               variant="text"
               onPress={toggleMode}
-              disabled={loading}
+              disabled={authLoading}
             />
           </View>
 

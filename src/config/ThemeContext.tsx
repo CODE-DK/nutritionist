@@ -1,8 +1,11 @@
 // ThemeContext - управление темой приложения
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 import { useColorScheme } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { LightColors, DarkColors } from './theme';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';

@@ -3,13 +3,26 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
+
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ScrollView,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+
 import Button from './Button';
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 import { calculateUserCalories, getGoalTypeLabel } from '../utils/calorieCalculator';
+
 import type { User, GoalType } from '../types';
 
 // Модалка редактирования имени
@@ -38,14 +51,19 @@ export function EditNameModal({ visible, currentName, onClose, onSave }: EditNam
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.editModals.editName')}</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {t('profile.editModals.editName')}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
           </View>
 
           <TextInput
-            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            style={[
+              styles.input,
+              { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
+            ]}
             placeholder={t('profile.editModals.enterName')}
             placeholderTextColor={theme.disabled}
             value={name}
@@ -105,20 +123,29 @@ export function EditTargetWeightModal({
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.editModals.editTargetWeight')}</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {t('profile.editModals.editTargetWeight')}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
           </View>
 
           <View style={[styles.infoCard, { backgroundColor: theme.background }]}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>{t('profile.editModals.currentWeight', { weight: currentWeight })}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>
+              {t('profile.editModals.currentWeight', { weight: currentWeight })}
+            </Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{currentWeight} kg</Text>
           </View>
 
-          <Text style={[styles.label, { color: theme.text }]}>{t('profile.editModals.editTargetWeight')} (kg)</Text>
+          <Text style={[styles.label, { color: theme.text }]}>
+            {t('profile.editModals.editTargetWeight')} (kg)
+          </Text>
           <TextInput
-            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            style={[
+              styles.input,
+              { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
+            ]}
             placeholder={t('profile.editModals.enterTargetWeight')}
             placeholderTextColor={theme.disabled}
             keyboardType="decimal-pad"
@@ -147,7 +174,6 @@ export function EditCaloriesModal({ visible, user, onClose, onSave }: EditCalori
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [calories, setCalories] = useState(user.dailyCalorieGoal.toString());
-  const [showRecalculate, setShowRecalculate] = useState(false);
 
   const canRecalculate =
     user.weight && user.height && user.age && user.gender && user.activityLevel && user.goalType;
@@ -169,7 +195,10 @@ export function EditCaloriesModal({ visible, user, onClose, onSave }: EditCalori
 
     setCalories(targetCalories.toString());
     setShowRecalculate(false);
-    Alert.alert(t('common.success'), t('profile.editModals.recommended', { calories: targetCalories }));
+    Alert.alert(
+      t('common.success'),
+      t('profile.editModals.recommended', { calories: targetCalories })
+    );
   };
 
   const handleSave = () => {
@@ -186,15 +215,22 @@ export function EditCaloriesModal({ visible, user, onClose, onSave }: EditCalori
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.editModals.editCalories')}</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {t('profile.editModals.editCalories')}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
           </View>
 
-          <Text style={[styles.label, { color: theme.text }]}>{t('profile.goalSettings.dailyCalories')}</Text>
+          <Text style={[styles.label, { color: theme.text }]}>
+            {t('profile.goalSettings.dailyCalories')}
+          </Text>
           <TextInput
-            style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            style={[
+              styles.input,
+              { backgroundColor: theme.background, color: theme.text, borderColor: theme.border },
+            ]}
             placeholder={t('profile.editModals.enterCalories')}
             placeholderTextColor={theme.disabled}
             keyboardType="number-pad"
@@ -210,7 +246,9 @@ export function EditCaloriesModal({ visible, user, onClose, onSave }: EditCalori
               onPress={handleRecalculate}
             >
               <Ionicons name="calculator-outline" size={20} color={theme.primary} />
-              <Text style={[styles.recalculateText, { color: theme.primary }]}>{t('profile.editModals.basedOnProfile')}</Text>
+              <Text style={[styles.recalculateText, { color: theme.primary }]}>
+                {t('profile.editModals.basedOnProfile')}
+              </Text>
             </TouchableOpacity>
           )}
 
@@ -262,14 +300,16 @@ export function EditGoalModal({ visible, currentGoal, onClose, onSave }: EditGoa
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.editModals.selectGoal')}</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {t('profile.editModals.selectGoal')}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {goals.map((g) => (
+            {goals.map(g => (
               <TouchableOpacity
                 key={g.type}
                 style={[
@@ -282,10 +322,14 @@ export function EditGoalModal({ visible, currentGoal, onClose, onSave }: EditGoa
                 <View style={styles.goalLeft}>
                   <Text style={styles.goalEmoji}>{g.emoji}</Text>
                   <View>
-                    <Text style={[styles.goalTitle, { color: theme.text }]}>{getGoalTypeLabel(g.type)}</Text>
+                    <Text style={[styles.goalTitle, { color: theme.text }]}>
+                      {getGoalTypeLabel(g.type)}
+                    </Text>
                   </View>
                 </View>
-                {goal === g.type && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+                {goal === g.type && (
+                  <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+                )}
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -298,41 +342,31 @@ export function EditGoalModal({ visible, currentGoal, onClose, onSave }: EditGoa
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  goalEmoji: {
+    fontSize: 28,
+    marginRight: Spacing.md,
   },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.large,
-    borderTopRightRadius: BorderRadius.large,
-    padding: Spacing.lg,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  goalLeft: {
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    flexDirection: 'row',
+    flex: 1,
   },
-  modalTitle: {
-    ...Typography.h2,
-  },
-  label: {
-    ...Typography.bodyLarge,
-    marginBottom: Spacing.sm,
-  },
-  input: {
-    ...Typography.bodyLarge,
-    padding: Spacing.md,
+  goalOption: {
+    alignItems: 'center',
     borderRadius: BorderRadius.medium,
     borderWidth: 1,
-    marginBottom: Spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
+  },
+  goalTitle: {
+    ...Typography.bodyLarge,
   },
   infoCard: {
-    padding: Spacing.md,
     borderRadius: BorderRadius.medium,
     marginBottom: Spacing.md,
+    padding: Spacing.md,
   },
   infoLabel: {
     ...Typography.caption,
@@ -341,40 +375,47 @@ const styles = StyleSheet.create({
   infoValue: {
     ...Typography.h3,
   },
-  recalculateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.md,
+  input: {
+    ...Typography.bodyLarge,
     borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+  },
+  label: {
+    ...Typography.bodyLarge,
     marginBottom: Spacing.sm,
+  },
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.large,
+    borderTopRightRadius: BorderRadius.large,
+    maxHeight: '80%',
+    padding: Spacing.lg,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.lg,
+  },
+  modalOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalTitle: {
+    ...Typography.h2,
+  },
+  recalculateButton: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   recalculateText: {
     ...Typography.bodyLarge,
     marginLeft: Spacing.sm,
-  },
-  goalOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
-    marginBottom: Spacing.sm,
-  },
-  goalLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  goalEmoji: {
-    fontSize: 28,
-    marginRight: Spacing.md,
-  },
-  goalTitle: {
-    ...Typography.bodyLarge,
-  },
-  goalDescription: {
-    ...Typography.caption,
   },
 });

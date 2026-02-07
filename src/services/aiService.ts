@@ -5,9 +5,10 @@
  * Управляет отправкой запросов к ChatGPT и сохранением истории.
  */
 
-import { supabase } from '../config/supabase';
-import type { ChatMessage, AIResponse, ApiError } from '../types';
 import { APP_CONFIG } from '../config/constants';
+import { supabase } from '../config/supabase';
+
+import type { ChatMessage, AIResponse, ApiError } from '../types';
 
 class AIService {
   /**
@@ -44,7 +45,7 @@ class AIService {
       const { data, error } = await supabase.functions.invoke('chat-gpt', {
         body: {
           message,
-          chatHistory: chatHistory.map((msg) => ({
+          chatHistory: chatHistory.map(msg => ({
             role: msg.role,
             content: msg.content,
           })),
@@ -87,7 +88,7 @@ class AIService {
 
       // Преобразуем в формат ChatMessage
       const messages: ChatMessage[] = [];
-      (data || []).forEach((item) => {
+      (data || []).forEach(item => {
         messages.push({
           id: `${item.id}-user`,
           role: 'user',
@@ -154,10 +155,7 @@ class AIService {
    */
   async clearChatHistory(userId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('chat_history')
-        .delete()
-        .eq('user_id', userId);
+      const { error } = await supabase.from('chat_history').delete().eq('user_id', userId);
 
       if (error) throw error;
     } catch (error: any) {
@@ -170,10 +168,7 @@ class AIService {
    */
   async deleteMessage(messageId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('chat_history')
-        .delete()
-        .eq('id', messageId);
+      const { error } = await supabase.from('chat_history').delete().eq('id', messageId);
 
       if (error) throw error;
     } catch (error: any) {

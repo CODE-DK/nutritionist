@@ -1,37 +1,43 @@
 // AppNavigator - главная навигация приложения
 
 import React, { useState, useEffect } from 'react';
+
 import { View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 // Screens
-import OnboardingScreen from '../screens/OnboardingScreen';
-import OnboardingQuestionnaire from '../screens/OnboardingQuestionnaire';
+import Loading from '../components/Loading';
+import { useAuth } from '../config/AuthContext';
+import { STORAGE_KEYS } from '../config/constants';
+import { Colors } from '../config/theme';
 import AuthScreen from '../screens/AuthScreen';
 import ChatScreen from '../screens/ChatScreen';
 import DiaryScreen from '../screens/DiaryScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import OnboardingQuestionnaire from '../screens/OnboardingQuestionnaire';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import PaywallScreen from '../screens/PaywallScreen';
-
+import ProfileScreen from '../screens/ProfileScreen';
 // Services
-import authService from '../services/authService';
 import analyticsService from '../services/analyticsService';
 
 // Config
-import { Colors } from '../config/theme';
-import { STORAGE_KEYS } from '../config/constants';
+
 import type { User } from '../types';
-import Loading from '../components/Loading';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // Bottom Tabs Navigator
-function MainTabs({ user, onUserUpdate, onLogout }: {
+function MainTabs({
+  user,
+  onUserUpdate,
+  onLogout,
+}: {
   user: User;
   onUserUpdate: (user: User) => void;
   onLogout: () => void;
@@ -64,24 +70,15 @@ function MainTabs({ user, onUserUpdate, onLogout }: {
           },
         })}
       >
-        <Tab.Screen
-          name="ChatTab"
-          options={{ tabBarLabel: 'Чат' }}
-        >
+        <Tab.Screen name="ChatTab" options={{ tabBarLabel: 'Чат' }}>
           {() => <ChatScreen userId={user.id} onLimitReached={() => setShowPaywall(true)} />}
         </Tab.Screen>
 
-        <Tab.Screen
-          name="DiaryTab"
-          options={{ tabBarLabel: 'Дневник' }}
-        >
+        <Tab.Screen name="DiaryTab" options={{ tabBarLabel: 'Дневник' }}>
           {() => <DiaryScreen userId={user.id} />}
         </Tab.Screen>
 
-        <Tab.Screen
-          name="ProfileTab"
-          options={{ tabBarLabel: 'Профиль' }}
-        >
+        <Tab.Screen name="ProfileTab" options={{ tabBarLabel: 'Профиль' }}>
           {() => <ProfileScreen user={user} onUserUpdate={onUserUpdate} onLogout={onLogout} />}
         </Tab.Screen>
       </Tab.Navigator>
@@ -112,30 +109,23 @@ function isProfileComplete(user: User): boolean {
 }
 
 export default function AppNavigator() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading, signOut, updateUser, refreshUser } = useAuth();
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
 
   useEffect(() => {
-    checkInitialState();
+    checkOnboardingState();
   }, []);
 
-  const checkInitialState = async () => {
+  const checkOnboardingState = async () => {
     try {
       // Проверяем onboarding
       const onboardingComplete = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
       setIsOnboardingComplete(onboardingComplete === 'true');
-
-      // Проверяем авторизацию
-      const user = await authService.getCurrentUser();
-      if (user) {
-        setCurrentUser(user);
-        analyticsService.setUserId(user.id);
-      }
     } catch (error) {
-      console.error('Error checking initial state:', error);
+      console.error('Error checking onboarding state:', error);
     } finally {
-      setIsLoading(false);
+      setIsCheckingOnboarding(false);
     }
   };
 
@@ -152,32 +142,28 @@ export default function AppNavigator() {
   };
 
   const handleAuthSuccess = async () => {
-    const user = await authService.getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      analyticsService.setUserId(user.id);
-    }
+    // Пользователь уже обновлен через AuthContext
+    await refreshUser();
   };
 
-  const handleQuestionnaireComplete = (updatedUser: User) => {
-    setCurrentUser(updatedUser);
+  const handleQuestionnaireComplete = async (_updatedUser: User) => {
+    await refreshUser();
     analyticsService.track('profile_setup_completed');
   };
 
-  const handleUserUpdate = (updatedUser: User) => {
-    setCurrentUser(updatedUser);
+  const handleUserUpdate = async (updates: Partial<User>) => {
+    await updateUser(updates);
   };
 
   const handleLogout = async () => {
-    setCurrentUser(null);
-    analyticsService.clearUserId();
+    await signOut();
   };
 
-  if (isLoading) {
+  if (loading || isCheckingOnboarding) {
     return <Loading fullScreen text="Загрузка..." />;
   }
 
-  const profileComplete = currentUser ? isProfileComplete(currentUser) : false;
+  const profileComplete = user ? isProfileComplete(user) : false;
 
   return (
     <NavigationContainer>
@@ -192,7 +178,7 @@ export default function AppNavigator() {
               />
             )}
           </Stack.Screen>
-        ) : !currentUser ? (
+        ) : !user ? (
           // Шаг 2: Авторизация (если пользователь не залогинен)
           <Stack.Screen name="Auth">
             {() => <AuthScreen onAuthSuccess={handleAuthSuccess} />}
@@ -200,23 +186,12 @@ export default function AppNavigator() {
         ) : !profileComplete ? (
           // Шаг 3: Анкета профиля (если профиль не заполнен)
           <Stack.Screen name="Questionnaire">
-            {() => (
-              <OnboardingQuestionnaire
-                user={currentUser}
-                onComplete={handleQuestionnaireComplete}
-              />
-            )}
+            {() => <OnboardingQuestionnaire user={user} onComplete={handleQuestionnaireComplete} />}
           </Stack.Screen>
         ) : (
           // Шаг 4: Главное приложение (все готово!)
           <Stack.Screen name="Main">
-            {() => (
-              <MainTabs
-                user={currentUser}
-                onUserUpdate={handleUserUpdate}
-                onLogout={handleLogout}
-              />
-            )}
+            {() => <MainTabs user={user} onUserUpdate={handleUserUpdate} onLogout={handleLogout} />}
           </Stack.Screen>
         )}
       </Stack.Navigator>

@@ -5,9 +5,10 @@
  * Управляет записями приемов пищи и статистикой.
  */
 
-import { supabase } from '../config/supabase';
-import type { FoodEntry, DailyStats, ApiError, MealType } from '../types';
 import { APP_CONFIG } from '../config/constants';
+import { supabase } from '../config/supabase';
+
+import type { FoodEntry, DailyStats, ApiError, MealType } from '../types';
 
 class DiaryService {
   /**
@@ -131,7 +132,7 @@ class DiaryService {
 
       // Группируем по датам
       const mealsByDate: Record<string, FoodEntry[]> = {};
-      (data || []).forEach((item) => {
+      (data || []).forEach(item => {
         const meal = this.mapToFoodEntry(item);
         if (!mealsByDate[meal.date]) {
           mealsByDate[meal.date] = [];
@@ -206,10 +207,7 @@ class DiaryService {
    */
   async deleteMeal(mealId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('food_diary')
-        .delete()
-        .eq('id', mealId);
+      const { error } = await supabase.from('food_diary').delete().eq('id', mealId);
 
       if (error) throw error;
     } catch (error: any) {

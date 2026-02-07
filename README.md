@@ -13,13 +13,39 @@ React Native приложение с AI-диетологом на базе ChatG
 
 ```bash
 # Установка
-yarn install
+pnpm install
 cd ios && pod install && cd ..
 
 # Запуск
-yarn ios      # или
-yarn android
+pnpm ios      # или
+pnpm android
 ```
+
+## Проверка зависимостей
+
+Рекомендуется регулярно проверять совместимость зависимостей с текущей версией Expo SDK:
+
+```bash
+# Проверка совместимости всех зависимостей
+npx expo-doctor
+
+# Проверка актуальности версий для текущего SDK
+npx expo install --check
+
+# Установка совместимых версий пакетов
+npx expo install expo-font expo-camera expo-image-picker
+```
+
+**Что проверяет `expo-doctor`:**
+- ✅ Совместимость версий пакетов с Expo SDK
+- ✅ Наличие обязательных peer dependencies
+- ✅ Конфигурация проекта
+- ✅ Переменные окружения
+
+**При проблемах:**
+1. Удалите `node_modules` и lock-файл: `rm -rf node_modules pnpm-lock.yaml`
+2. Переустановите зависимости: `pnpm install`
+3. Запустите проверку: `npx expo-doctor`
 
 ## Настройка
 
@@ -76,11 +102,13 @@ checkout/
 ## Функции
 
 **Бесплатно:**
+
 - 5 запросов к AI в день
 - Дневник питания
 - Подсчет калорий
 
 **Premium ($9.99/мес):**
+
 - Неограниченный AI
 - Планы питания
 - Аналитика
@@ -88,6 +116,7 @@ checkout/
 ## Документация
 
 **Проектная документация:**
+
 - [MVP.md](docs/MVP.md) - План минимального продукта
 - [DATABASE.md](docs/DATABASE.md) - Структура БД и схема таблиц
 - [DESIGN.md](docs/DESIGN.md) - Дизайн система и UI/UX
@@ -96,12 +125,14 @@ checkout/
 - [PLAN.md](docs/PLAN.md) - План разработки
 
 **Настройка окружения:**
+
 - [SETUP.md](docs/SETUP.md) - Запуск приложения
 - [ENV.md](docs/ENV.md) - Настройка переменных окружения
 - [SUPABASE.md](docs/SUPABASE.md) - Настройка Supabase
 - [LOCALIZATION.md](docs/LOCALIZATION.md) - Локализация (ru/en)
 
 **Внешние ресурсы:**
+
 - [Supabase Docs](https://supabase.com/docs)
 - [OpenAI API](https://platform.openai.com/docs)
 

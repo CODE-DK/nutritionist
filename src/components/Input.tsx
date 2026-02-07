@@ -1,14 +1,9 @@
 // Input Component - согласно DESIGN.md
 
 import React, { useState } from 'react';
-import {
-  TextInput,
-  View,
-  Text,
-  StyleSheet,
-  TextInputProps,
-  ViewStyle,
-} from 'react-native';
+
+import { TextInput, View, Text, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
+
 import { Typography, BorderRadius, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -75,22 +70,22 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.md,
   },
-  label: {
-    fontSize: Typography.body.fontSize,
-    fontWeight: '500',
-    marginBottom: Spacing.sm,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderRadius: BorderRadius.medium,
-    paddingHorizontal: Spacing.md,
-    fontSize: Typography.bodyLarge.fontSize,
-  },
   errorContainer: {
     marginTop: Spacing.xs,
   },
   errorText: {
     fontSize: Typography.caption.fontSize,
+  },
+  input: {
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    fontSize: Typography.bodyLarge.fontSize,
+    height: 48,
+    paddingHorizontal: Spacing.md,
+  },
+  label: {
+    fontSize: Typography.body.fontSize,
+    fontWeight: '500',
+    marginBottom: Spacing.sm,
   },
 });

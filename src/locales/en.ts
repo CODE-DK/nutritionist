@@ -182,7 +182,8 @@ export default {
         enterTargetWeight: 'Enter target weight',
         invalidWeight: 'Please enter a valid weight (30-300 kg)',
         targetWeightLowerForLoss: 'Target weight must be lower than current weight for weight loss',
-        targetWeightHigherForGain: 'Target weight must be higher than current weight for muscle gain',
+        targetWeightHigherForGain:
+          'Target weight must be higher than current weight for muscle gain',
         currentWeight: 'Current weight: {{weight}} kg',
         yourGoal: 'Your goal: {{goal}}',
 

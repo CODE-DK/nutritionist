@@ -1,10 +1,14 @@
 // StatsCard Component - карточка статистики за день согласно DESIGN.md
 
 import React from 'react';
+
 import { View, Text, StyleSheet } from 'react-native';
+
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { Typography, BorderRadius, Shadows, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
+
 import type { DailyStats } from '../types';
 
 interface StatsCardProps {
@@ -34,64 +38,64 @@ export default function StatsCard({ stats }: StatsCardProps) {
   };
 
   const styles = StyleSheet.create({
-    card: {
-      borderRadius: BorderRadius.xlarge,
-      padding: Spacing.lg,
-      marginBottom: Spacing.md,
-    },
-    date: {
-      fontSize: Typography.body.fontSize,
-      color: theme.white,
-      opacity: 0.9,
-      marginBottom: Spacing.sm,
-    },
     calories: {
+      color: theme.white,
       fontSize: 28,
       fontWeight: '700',
+      marginBottom: Spacing.md,
+    },
+    card: {
+      borderRadius: BorderRadius.xlarge,
+      marginBottom: Spacing.md,
+      padding: Spacing.lg,
+    },
+    date: {
       color: theme.white,
-      marginBottom: Spacing.md,
-    },
-    progressContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: Spacing.md,
-    },
-    progressTrack: {
-      flex: 1,
-      height: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      borderRadius: 4,
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: theme.white,
-      borderRadius: 4,
-    },
-    progressText: {
       fontSize: Typography.body.fontSize,
-      fontWeight: '600',
-      color: theme.white,
-      marginLeft: Spacing.sm,
-      minWidth: 40,
-    },
-    macrosContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+      opacity: 0.9,
     },
     macroItem: {
       alignItems: 'center',
     },
     macroLabel: {
-      fontSize: Typography.caption.fontSize,
       color: theme.white,
-      opacity: 0.8,
+      fontSize: Typography.caption.fontSize,
       marginBottom: Spacing.xs,
+      opacity: 0.8,
     },
     macroValue: {
+      color: theme.white,
       fontSize: Typography.bodyLarge.fontSize,
       fontWeight: '600',
+    },
+    macrosContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    progressContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      marginBottom: Spacing.md,
+    },
+    progressFill: {
+      backgroundColor: theme.white,
+      borderRadius: 4,
+      height: '100%',
+    },
+    progressText: {
       color: theme.white,
+      fontSize: Typography.body.fontSize,
+      fontWeight: '600',
+      marginLeft: Spacing.sm,
+      minWidth: 40,
+    },
+    progressTrack: {
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: 4,
+      flex: 1,
+      height: 8,
+      overflow: 'hidden',
     },
   });
 

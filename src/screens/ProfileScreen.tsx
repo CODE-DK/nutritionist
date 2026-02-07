@@ -1,27 +1,36 @@
 // ProfileScreen - экран профиля пользователя
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import Card from '../components/Card';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Button from '../components/Button';
+import Card from '../components/Card';
+import EditPhysicalParamsModal from '../components/EditPhysicalParamsModal';
+import MetabolismInfoModal from '../components/MetabolismInfoModal';
 import {
   EditNameModal,
   EditTargetWeightModal,
   EditCaloriesModal,
   EditGoalModal,
 } from '../components/ProfileEditModals';
-import EditPhysicalParamsModal from '../components/EditPhysicalParamsModal';
-import MetabolismInfoModal from '../components/MetabolismInfoModal';
 import ProgressCard from '../components/ProgressCard';
+import { useAuth } from '../config/AuthContext';
+import { saveLanguage, LANGUAGES } from '../config/i18n';
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme, ThemeMode } from '../config/ThemeContext';
-import { getGoalTypeLabel, calculateUserCalories, calculateWeeklyWeightChange, calculateWeeksToGoal } from '../utils/calorieCalculator';
-import { saveLanguage, LANGUAGES } from '../config/i18n';
-import authService from '../services/authService';
 import analyticsService from '../services/analyticsService';
+import {
+  getGoalTypeLabel,
+  calculateUserCalories,
+  calculateWeeklyWeightChange,
+  calculateWeeksToGoal,
+} from '../utils/calorieCalculator';
+
 import type { User, GoalType } from '../types';
 
 interface ProfileScreenProps {
@@ -33,8 +42,8 @@ interface ProfileScreenProps {
 export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileScreenProps) {
   const { theme, themeMode, isDark, setThemeMode } = useTheme();
   const { t, i18n } = useTranslation();
+  const { signOut, updateUser: updateAuthUser } = useAuth();
   const [currentUser, setCurrentUser] = useState(user);
-  const [loading, setLoading] = useState(false);
 
   // Modal states
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -53,9 +62,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         text: t('profile.actions.confirm'),
         style: 'destructive',
         onPress: async () => {
-          await authService.signOut();
-          analyticsService.track('user_logged_out');
-          analyticsService.clearUserId();
+          await signOut();
           onLogout();
         },
       },
@@ -87,7 +94,8 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
   const handleUpdateProfile = async (updates: Partial<User>) => {
     setLoading(true);
     try {
-      const updatedUser = await authService.updateProfile(currentUser.id, updates);
+      await updateAuthUser(updates);
+      const updatedUser = { ...currentUser, ...updates };
       setCurrentUser(updatedUser);
       onUserUpdate?.(updatedUser);
       analyticsService.track('profile_updated', updates);
@@ -126,7 +134,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
     gender: 'male' | 'female';
     recalculateCalories: boolean;
   }) => {
-    let finalUpdates: Partial<User> = {
+    const finalUpdates: Partial<User> = {
       height: updates.height,
       weight: updates.weight,
       age: updates.age,
@@ -199,7 +207,9 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+      <View
+        style={[styles.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}
+      >
         <Text style={[styles.headerTitle, { color: theme.text }]}>{t('profile.title')}</Text>
       </View>
 
@@ -209,25 +219,27 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
           <View style={[styles.avatar, { backgroundColor: theme.primaryLight }]}>
             <Text style={styles.avatarText}>👤</Text>
           </View>
-          <Text style={[styles.userName, { color: theme.text }]}>{currentUser.name || t('profile.user')}</Text>
-          <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{currentUser.email}</Text>
+          <Text style={[styles.userName, { color: theme.text }]}>
+            {currentUser.name || t('profile.user')}
+          </Text>
+          <Text style={[styles.userEmail, { color: theme.textSecondary }]}>
+            {currentUser.email}
+          </Text>
           <Text style={[styles.editHint, { color: theme.disabled }]}>{t('profile.editHint')}</Text>
         </TouchableOpacity>
 
         {/* Секция 1: Мои показатели */}
         <Card style={styles.physicalParamsCard}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>📊 Мои показатели</Text>
+            <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>
+              📊 Мои показатели
+            </Text>
           </View>
 
           {currentUser.weight && currentUser.height && currentUser.age && currentUser.gender ? (
             <>
               <View style={styles.statsGrid}>
-                <StatRow
-                  label="Текущий вес"
-                  value={`${currentUser.weight} кг`}
-                  theme={theme}
-                />
+                <StatRow label="Текущий вес" value={`${currentUser.weight} кг`} theme={theme} />
                 {currentUser.targetWeight && (
                   <StatRow
                     label="Целевой вес"
@@ -236,16 +248,8 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
                     theme={theme}
                   />
                 )}
-                <StatRow
-                  label="Рост"
-                  value={`${currentUser.height} см`}
-                  theme={theme}
-                />
-                <StatRow
-                  label="Возраст"
-                  value={`${currentUser.age} лет`}
-                  theme={theme}
-                />
+                <StatRow label="Рост" value={`${currentUser.height} см`} theme={theme} />
+                <StatRow label="Возраст" value={`${currentUser.age} лет`} theme={theme} />
                 <StatRow
                   label="Пол"
                   value={currentUser.gender === 'male' ? 'Мужской' : 'Женский'}
@@ -277,7 +281,9 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         {hasCompleteProfile && metabolismData && (
           <Card style={styles.metabolismCard}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>🔥 Метаболизм</Text>
+              <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>
+                🔥 Метаболизм
+              </Text>
               <TouchableOpacity onPress={() => setShowMetabolismInfoModal(true)}>
                 <Ionicons name="information-circle-outline" size={24} color={theme.primary} />
               </TouchableOpacity>
@@ -328,11 +334,18 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         {/* Subscription Card */}
         <Card style={[styles.subscriptionCard, isPremium && styles.premiumCard]}>
           <View style={styles.subscriptionHeader}>
-            <Text style={[styles.subscriptionType, { color: isPremium ? theme.white : theme.text }]}>
+            <Text
+              style={[styles.subscriptionType, { color: isPremium ? theme.white : theme.text }]}
+            >
               {isPremium ? t('profile.subscription.premium') : t('profile.subscription.free')}
             </Text>
           </View>
-          <Text style={[styles.subscriptionDescription, { color: isPremium ? theme.white : theme.textSecondary }]}>
+          <Text
+            style={[
+              styles.subscriptionDescription,
+              { color: isPremium ? theme.white : theme.textSecondary },
+            ]}
+          >
             {isPremium
               ? t('profile.subscription.premiumUntil', { date: '06.03.2026' })
               : t('profile.subscription.upgradeToPremium')}
@@ -347,30 +360,44 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         </Card>
 
         {/* Settings Section */}
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('profile.sections.goalSettings')}</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          {t('profile.sections.goalSettings')}
+        </Text>
 
         <SettingItem
           icon="trophy-outline"
           title={t('profile.goalSettings.targetWeight')}
-          value={currentUser.targetWeight ? t('profile.goalSettings.targetWeightValue', { weight: currentUser.targetWeight }) : t('profile.goalSettings.notSet')}
+          value={
+            currentUser.targetWeight
+              ? t('profile.goalSettings.targetWeightValue', { weight: currentUser.targetWeight })
+              : t('profile.goalSettings.notSet')
+          }
           onPress={() => setShowTargetWeightModal(true)}
         />
 
         <SettingItem
           icon="flame-outline"
           title={t('profile.goalSettings.dailyCalories')}
-          value={t('profile.goalSettings.dailyCaloriesValue', { calories: currentUser.dailyCalorieGoal })}
+          value={t('profile.goalSettings.dailyCaloriesValue', {
+            calories: currentUser.dailyCalorieGoal,
+          })}
           onPress={() => setShowCaloriesModal(true)}
         />
 
         <SettingItem
           icon="stats-chart-outline"
           title={t('profile.goalSettings.goal')}
-          value={currentUser.goalType ? getGoalTypeLabel(currentUser.goalType) : t('profile.goalSettings.goalNotSet')}
+          value={
+            currentUser.goalType
+              ? getGoalTypeLabel(currentUser.goalType)
+              : t('profile.goalSettings.goalNotSet')
+          }
           onPress={() => setShowGoalModal(true)}
         />
 
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('profile.sections.appSettings')}</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          {t('profile.sections.appSettings')}
+        </Text>
 
         <SettingItem
           icon="notifications-outline"
@@ -379,7 +406,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         />
 
         <SettingItem
-          icon={isDark ? "moon" : "moon-outline"}
+          icon={isDark ? 'moon' : 'moon-outline'}
           iconColor={theme.primary}
           title={t('profile.appSettings.theme')}
           value={getThemeModeLabel()}
@@ -402,11 +429,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
 
         {/* Logout Button */}
         <View style={styles.logoutContainer}>
-          <Button
-            title={t('profile.actions.logout')}
-            variant="secondary"
-            onPress={handleLogout}
-          />
+          <Button title={t('profile.actions.logout')} variant="secondary" onPress={handleLogout} />
         </View>
       </ScrollView>
 
@@ -420,7 +443,9 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.theme.selectTheme')}</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
+                {t('profile.theme.selectTheme')}
+              </Text>
               <TouchableOpacity onPress={() => setShowThemeModal(false)}>
                 <Ionicons name="close" size={28} color={theme.text} />
               </TouchableOpacity>
@@ -436,9 +461,13 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
             >
               <View style={styles.themeOptionLeft}>
                 <Ionicons name="sunny" size={24} color={theme.primary} />
-                <Text style={[styles.themeOptionText, { color: theme.text }]}>{t('profile.theme.light')}</Text>
+                <Text style={[styles.themeOptionText, { color: theme.text }]}>
+                  {t('profile.theme.light')}
+                </Text>
               </View>
-              {themeMode === 'light' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              {themeMode === 'light' && (
+                <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -451,9 +480,13 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
             >
               <View style={styles.themeOptionLeft}>
                 <Ionicons name="moon" size={24} color={theme.primary} />
-                <Text style={[styles.themeOptionText, { color: theme.text }]}>{t('profile.theme.dark')}</Text>
+                <Text style={[styles.themeOptionText, { color: theme.text }]}>
+                  {t('profile.theme.dark')}
+                </Text>
               </View>
-              {themeMode === 'dark' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              {themeMode === 'dark' && (
+                <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -466,9 +499,13 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
             >
               <View style={styles.themeOptionLeft}>
                 <Ionicons name="phone-portrait-outline" size={24} color={theme.primary} />
-                <Text style={[styles.themeOptionText, { color: theme.text }]}>{t('profile.theme.auto')}</Text>
+                <Text style={[styles.themeOptionText, { color: theme.text }]}>
+                  {t('profile.theme.auto')}
+                </Text>
               </View>
-              {themeMode === 'auto' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              {themeMode === 'auto' && (
+                <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -484,7 +521,9 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.text }]}>{t('profile.language.selectLanguage')}</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
+                {t('profile.language.selectLanguage')}
+              </Text>
               <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
                 <Ionicons name="close" size={28} color={theme.text} />
               </TouchableOpacity>
@@ -500,9 +539,13 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
             >
               <View style={styles.themeOptionLeft}>
                 <Text style={styles.languageFlag}>🇷🇺</Text>
-                <Text style={[styles.themeOptionText, { color: theme.text }]}>{t('profile.language.russian')}</Text>
+                <Text style={[styles.themeOptionText, { color: theme.text }]}>
+                  {t('profile.language.russian')}
+                </Text>
               </View>
-              {i18n.language === 'ru' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              {i18n.language === 'ru' && (
+                <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -515,9 +558,13 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
             >
               <View style={styles.themeOptionLeft}>
                 <Text style={styles.languageFlag}>🇬🇧</Text>
-                <Text style={[styles.themeOptionText, { color: theme.text }]}>{t('profile.language.english')}</Text>
+                <Text style={[styles.themeOptionText, { color: theme.text }]}>
+                  {t('profile.language.english')}
+                </Text>
               </View>
-              {i18n.language === 'en' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+              {i18n.language === 'en' && (
+                <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -581,13 +628,18 @@ function SettingItem({ icon, iconColor, title, value, onPress }: SettingItemProp
   const { theme } = useTheme();
 
   return (
-    <TouchableOpacity style={[styles.settingItem, { backgroundColor: theme.surface }]} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.settingItem, { backgroundColor: theme.surface }]}
+      onPress={onPress}
+    >
       <View style={styles.settingLeft}>
         <Ionicons name={icon as any} size={24} color={iconColor || theme.textSecondary} />
         <Text style={[styles.settingTitle, { color: theme.text }]}>{title}</Text>
       </View>
       <View style={styles.settingRight}>
-        {value && <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{value}</Text>}
+        {value && (
+          <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{value}</Text>
+        )}
         <Ionicons name="chevron-forward" size={20} color={theme.disabled} />
       </View>
     </TouchableOpacity>
@@ -595,7 +647,17 @@ function SettingItem({ icon, iconColor, title, value, onPress }: SettingItemProp
 }
 
 // Вспомогательный компонент для строки со статистикой
-function StatRow({ label, value, badge, theme }: { label: string; value: string; badge?: string; theme: any }) {
+function StatRow({
+  label,
+  value,
+  badge,
+  theme,
+}: {
+  label: string;
+  value: string;
+  badge?: string;
+  theme: any;
+}) {
   return (
     <View style={styles.statRow}>
       <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{label}</Text>
@@ -612,7 +674,17 @@ function StatRow({ label, value, badge, theme }: { label: string; value: string;
 }
 
 // Вспомогательный компонент для строки метаболизма с цветом
-function MetabolismRow({ label, value, color, theme }: { label: string; value: string; color: string; theme: any }) {
+function MetabolismRow({
+  label,
+  value,
+  color,
+  theme,
+}: {
+  label: string;
+  value: string;
+  color: string;
+  theme: any;
+}) {
   return (
     <View style={styles.metabolismRow}>
       <View style={[styles.colorIndicator, { backgroundColor: color }]} />
@@ -623,46 +695,46 @@ function MetabolismRow({ label, value, color, theme }: { label: string; value: s
 }
 
 const styles = StyleSheet.create({
+  avatar: {
+    alignItems: 'center',
+    borderRadius: 40,
+    height: 80,
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+    width: 80,
+  },
+  avatarText: {
+    fontSize: 40,
+  },
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    ...Typography.h3,
   },
   content: {
     flex: 1,
     padding: Spacing.md,
   },
-  userInfo: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xl,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  avatarText: {
-    fontSize: 40,
-  },
-  userName: {
-    ...Typography.h2,
-    marginBottom: Spacing.xs,
-  },
-  userEmail: {
-    ...Typography.body,
+  header: {
+    borderBottomWidth: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
   },
   editHint: {
     ...Typography.caption,
     marginTop: Spacing.xs,
+  },
+  headerTitle: {
+    ...Typography.h3,
+  },
+  userEmail: {
+    ...Typography.body,
+  },
+  userInfo: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  userName: {
+    ...Typography.h2,
+    marginBottom: Spacing.xs,
   },
   subscriptionCard: {
     marginBottom: Spacing.lg,
@@ -685,20 +757,20 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...Typography.h3,
-    marginTop: Spacing.lg,
     marginBottom: Spacing.md,
+    marginTop: Spacing.lg,
   },
   settingItem: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
     marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   settingLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     flex: 1,
   },
   settingTitle: {
@@ -706,51 +778,51 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.md,
   },
   settingRight: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   settingValue: {
     ...Typography.body,
     marginRight: Spacing.sm,
   },
   logoutContainer: {
-    marginTop: Spacing.xl,
     marginBottom: Spacing.xxl,
+    marginTop: Spacing.xl,
   },
   // Modal styles
   modalOverlay: {
-    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
     justifyContent: 'flex-end',
   },
   modalContent: {
     borderTopLeftRadius: BorderRadius.large,
     borderTopRightRadius: BorderRadius.large,
-    padding: Spacing.lg,
     maxHeight: '50%',
+    padding: Spacing.lg,
   },
   modalHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: Spacing.lg,
   },
   modalTitle: {
     ...Typography.h2,
   },
   themeOption: {
+    alignItems: 'center',
+    borderColor: 'transparent',
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    padding: Spacing.md,
   },
   themeOptionLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   themeOptionText: {
     ...Typography.bodyLarge,
@@ -768,9 +840,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   sectionHeaderRow: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: Spacing.md,
   },
   sectionTitleWithEmoji: {
@@ -781,26 +853,26 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   statRow: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: Spacing.sm,
   },
   statLabel: {
     ...Typography.body,
   },
   statRight: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: Spacing.sm,
   },
   statValue: {
     ...Typography.bodyLarge,
   },
   badge: {
+    borderRadius: BorderRadius.small,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
-    borderRadius: BorderRadius.small,
   },
   badgeText: {
     ...Typography.caption,
@@ -815,8 +887,8 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     ...Typography.body,
-    textAlign: 'center',
     marginBottom: Spacing.md,
+    textAlign: 'center',
   },
   fillButton: {
     minWidth: 150,
@@ -825,15 +897,15 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   metabolismRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     paddingVertical: Spacing.sm,
   },
   colorIndicator: {
-    width: 4,
-    height: 16,
     borderRadius: 2,
+    height: 16,
     marginRight: Spacing.md,
+    width: 4,
   },
   metabolismLabel: {
     ...Typography.body,

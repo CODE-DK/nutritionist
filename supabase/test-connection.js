@@ -15,7 +15,9 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Ошибка: EXPO_PUBLIC_SUPABASE_URL или EXPO_PUBLIC_SUPABASE_ANON_KEY не найдены в .env');
+  console.error(
+    '❌ Ошибка: EXPO_PUBLIC_SUPABASE_URL или EXPO_PUBLIC_SUPABASE_ANON_KEY не найдены в .env'
+  );
   process.exit(1);
 }
 
@@ -32,12 +34,10 @@ async function testConnection() {
 
   try {
     // Тест 1: Проверка подключения через запрос к БД
-    const { data, error } = await supabase
-      .from('users')
-      .select('count')
-      .limit(1);
+    const { data, error } = await supabase.from('users').select('count').limit(1);
 
-    if (error && error.code !== 'PGRST116') {  // PGRST116 = таблица пуста, это ок
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = таблица пуста, это ок
       console.log('   ❌ Ошибка подключения:', error.message);
       return false;
     }
@@ -50,10 +50,7 @@ async function testConnection() {
     const tables = ['users', 'chat_history', 'food_diary', 'photo_usage', 'photo_analysis_log'];
 
     for (const table of tables) {
-      const { error: tableError } = await supabase
-        .from(table)
-        .select('*')
-        .limit(0);
+      const { error: tableError } = await supabase.from(table).select('*').limit(0);
 
       if (tableError) {
         console.log(`   ❌ Таблица ${table}: не найдена или нет доступа`);
@@ -69,22 +66,19 @@ async function testConnection() {
     // Проверяем, что функции существуют (они вернут 401/400 без авторизации, но это норм)
     const functions = [
       { name: 'chat-gpt', endpoint: '/chat-gpt' },
-      { name: 'analyze-food-photo', endpoint: '/analyze-food-photo' }
+      { name: 'analyze-food-photo', endpoint: '/analyze-food-photo' },
     ];
 
     for (const func of functions) {
       try {
-        const response = await fetch(
-          `${supabaseUrl}/functions/v1${func.endpoint}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabaseKey}`
-            },
-            body: JSON.stringify({ test: true })
-          }
-        );
+        const response = await fetch(`${supabaseUrl}/functions/v1${func.endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({ test: true }),
+        });
 
         // 401 = unauthorized (ожидаемо без JWT)
         // 400 = bad request (ожидаемо для неправильного запроса)
@@ -121,7 +115,6 @@ async function testConnection() {
     console.log('');
 
     return true;
-
   } catch (error) {
     console.log('❌ Критическая ошибка:', error.message);
     return false;

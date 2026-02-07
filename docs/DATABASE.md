@@ -69,30 +69,32 @@
 
 **Назначение:** Профиль пользователя с данными о подписке, лимитах и физических параметрах.
 
-| Поле | Тип | Описание | По умолчанию |
-|------|-----|----------|--------------|
-| `id` | `uuid` | PK, связь с auth.users | - |
-| `full_name` | `varchar(255)` | Имя пользователя | `null` |
-| `subscription_tier` | `text` | free / premium | `'free'` |
-| `stripe_customer_id` | `varchar(255)` | ID клиента в Stripe | `null` |
-| `daily_ai_requests` | `integer` | Счетчик запросов за день | `0` |
-| `last_request_date` | `date` | Дата последнего запроса | `null` |
-| `height` | `integer` | Рост в см | `null` |
-| `weight` | `numeric(5,2)` | Текущий вес в кг | `null` |
-| `age` | `integer` | Возраст в годах | `null` |
-| `gender` | `text` | male / female | `null` |
-| `activity_level` | `text` | sedentary / light / moderate / active / very_active | `null` |
-| `goal_type` | `text` | lose_weight / maintain / gain_weight | `null` |
-| `target_weight` | `numeric(5,2)` | Целевой вес в кг | `null` |
-| `target_calories` | `integer` | Целевая норма калорий в день | `null` |
-| `created_at` | `timestamptz` | Дата регистрации | `now()` |
+| Поле                 | Тип            | Описание                                            | По умолчанию |
+| -------------------- | -------------- | --------------------------------------------------- | ------------ |
+| `id`                 | `uuid`         | PK, связь с auth.users                              | -            |
+| `full_name`          | `varchar(255)` | Имя пользователя                                    | `null`       |
+| `subscription_tier`  | `text`         | free / premium                                      | `'free'`     |
+| `stripe_customer_id` | `varchar(255)` | ID клиента в Stripe                                 | `null`       |
+| `daily_ai_requests`  | `integer`      | Счетчик запросов за день                            | `0`          |
+| `last_request_date`  | `date`         | Дата последнего запроса                             | `null`       |
+| `height`             | `integer`      | Рост в см                                           | `null`       |
+| `weight`             | `numeric(5,2)` | Текущий вес в кг                                    | `null`       |
+| `age`                | `integer`      | Возраст в годах                                     | `null`       |
+| `gender`             | `text`         | male / female                                       | `null`       |
+| `activity_level`     | `text`         | sedentary / light / moderate / active / very_active | `null`       |
+| `goal_type`          | `text`         | lose_weight / maintain / gain_weight                | `null`       |
+| `target_weight`      | `numeric(5,2)` | Целевой вес в кг                                    | `null`       |
+| `target_calories`    | `integer`      | Целевая норма калорий в день                        | `null`       |
+| `created_at`         | `timestamptz`  | Дата регистрации                                    | `now()`      |
 
 **Индексы:**
+
 - `PRIMARY KEY (id)`
 - `INDEX ON (stripe_customer_id)` - для быстрого поиска при webhook
 - `INDEX ON (subscription_tier, daily_ai_requests)` - для проверки лимитов
 
 **RLS политики:**
+
 ```sql
 -- Пользователи могут читать только свои данные
 CREATE POLICY "Users can read own data"
@@ -106,6 +108,7 @@ CREATE POLICY "Users can update own data"
 ```
 
 **Пример записи:**
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -134,21 +137,23 @@ CREATE POLICY "Users can update own data"
 
 **Назначение:** История диалогов с AI-диетологом.
 
-| Поле | Тип | Описание | По умолчанию |
-|------|-----|----------|--------------|
-| `id` | `uuid` | PK | `uuid_generate_v4()` |
-| `user_id` | `uuid` | FK → users.id | - |
-| `message` | `text` | Вопрос пользователя (макс 5000) | - |
-| `response` | `text` | Ответ AI (макс 10000) | - |
-| `tokens_used` | `integer` | Использовано токенов | `null` |
-| `created_at` | `timestamptz` | Время запроса | `now()` |
+| Поле          | Тип           | Описание                        | По умолчанию         |
+| ------------- | ------------- | ------------------------------- | -------------------- |
+| `id`          | `uuid`        | PK                              | `uuid_generate_v4()` |
+| `user_id`     | `uuid`        | FK → users.id                   | -                    |
+| `message`     | `text`        | Вопрос пользователя (макс 5000) | -                    |
+| `response`    | `text`        | Ответ AI (макс 10000)           | -                    |
+| `tokens_used` | `integer`     | Использовано токенов            | `null`               |
+| `created_at`  | `timestamptz` | Время запроса                   | `now()`              |
 
 **Индексы:**
+
 - `PRIMARY KEY (id)`
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 - `INDEX ON (user_id, created_at DESC)` - для быстрой загрузки истории
 
 **RLS политики:**
+
 ```sql
 -- Пользователи видят только свою историю
 CREATE POLICY "Users can read own chat history"
@@ -162,6 +167,7 @@ CREATE POLICY "Users can insert own chat history"
 ```
 
 **Пример записи:**
+
 ```json
 {
   "id": "223e4567-e89b-12d3-a456-426614174001",
@@ -174,6 +180,7 @@ CREATE POLICY "Users can insert own chat history"
 ```
 
 **Полезные запросы:**
+
 ```sql
 -- Последние 10 сообщений пользователя
 SELECT message, response, created_at
@@ -194,26 +201,28 @@ WHERE user_id = 'user-uuid';
 
 **Назначение:** Дневник питания - запись приемов пищи.
 
-| Поле | Тип | Описание | По умолчанию |
-|------|-----|----------|--------------|
-| `id` | `uuid` | PK | `uuid_generate_v4()` |
-| `user_id` | `uuid` | FK → users.id | - |
-| `meal_type` | `text` | breakfast/lunch/dinner/snack | - |
-| `food_name` | `varchar(500)` | Название блюда | - |
-| `calories` | `integer` | Калории (ккал, 0-10000) | `null` |
-| `protein` | `numeric(6,2)` | Белки (г, 0-1000) | `null` |
-| `carbs` | `numeric(6,2)` | Углеводы (г, 0-1000) | `null` |
-| `fats` | `numeric(6,2)` | Жиры (г, 0-1000) | `null` |
-| `meal_date` | `date` | Дата приема пищи | - |
-| `created_at` | `timestamptz` | Время добавления | `now()` |
+| Поле         | Тип            | Описание                     | По умолчанию         |
+| ------------ | -------------- | ---------------------------- | -------------------- |
+| `id`         | `uuid`         | PK                           | `uuid_generate_v4()` |
+| `user_id`    | `uuid`         | FK → users.id                | -                    |
+| `meal_type`  | `text`         | breakfast/lunch/dinner/snack | -                    |
+| `food_name`  | `varchar(500)` | Название блюда               | -                    |
+| `calories`   | `integer`      | Калории (ккал, 0-10000)      | `null`               |
+| `protein`    | `numeric(6,2)` | Белки (г, 0-1000)            | `null`               |
+| `carbs`      | `numeric(6,2)` | Углеводы (г, 0-1000)         | `null`               |
+| `fats`       | `numeric(6,2)` | Жиры (г, 0-1000)             | `null`               |
+| `meal_date`  | `date`         | Дата приема пищи             | -                    |
+| `created_at` | `timestamptz`  | Время добавления             | `now()`              |
 
 **Индексы:**
+
 - `PRIMARY KEY (id)`
 - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
 - `INDEX ON (user_id, meal_date DESC)` - для быстрой загрузки дневника
 - `INDEX ON (user_id, meal_type, meal_date)` - для группировки по типу приема
 
 **RLS политики:**
+
 ```sql
 -- Пользователи имеют полный доступ к своему дневнику
 CREATE POLICY "Users can manage own food diary"
@@ -222,6 +231,7 @@ CREATE POLICY "Users can manage own food diary"
 ```
 
 **Пример записи:**
+
 ```json
 {
   "id": "323e4567-e89b-12d3-a456-426614174002",
@@ -238,6 +248,7 @@ CREATE POLICY "Users can manage own food diary"
 ```
 
 **Полезные запросы:**
+
 ```sql
 -- Дневник за сегодня
 SELECT meal_type, food_name, calories, protein, carbs, fats
@@ -294,11 +305,13 @@ FROM (
 ### Применение миграции
 
 **Способ 1: Через Supabase CLI (рекомендуется)**
+
 ```bash
 supabase db push
 ```
 
 **Способ 2: Через Dashboard**
+
 1. Откройте **SQL Editor** в Supabase Dashboard
 2. Скопируйте содержимое файла `001_initial_fixed.sql`
 3. Вставьте в редактор и нажмите **"Run"**
@@ -329,6 +342,7 @@ ALTER TABLE public.users
 ---
 
 **Создание таблиц:**
+
 ```sql
 -- 1. Создание таблицы users
 CREATE TABLE public.users (
@@ -383,6 +397,7 @@ CREATE TABLE public.food_diary (
 ```
 
 **Индексы:**
+
 ```sql
 CREATE INDEX idx_chat_history_user_date ON chat_history(user_id, created_at DESC);
 CREATE INDEX idx_food_diary_user_date ON food_diary(user_id, meal_date DESC);
@@ -392,6 +407,7 @@ CREATE INDEX idx_users_subscription_limits ON users(subscription_tier, daily_ai_
 ```
 
 **Row Level Security:**
+
 ```sql
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_history ENABLE ROW LEVEL SECURITY;
@@ -481,10 +497,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 **Использование в приложении:**
+
 ```typescript
 // Проверка лимита перед AI-запросом
 const { data, error } = await supabase.rpc('check_and_increment_limit', {
-  p_user_id: userId
+  p_user_id: userId,
 });
 
 if (!data) {
@@ -502,7 +519,7 @@ if (!data) {
 // Регистрация через Supabase Auth
 const { data, error } = await supabase.auth.signUp({
   email: 'user@example.com',
-  password: 'password123'
+  password: 'password123',
 });
 
 // Профиль создается автоматически через триггер
@@ -513,23 +530,23 @@ const { data, error } = await supabase.auth.signUp({
 
 ```typescript
 // Вариант 1: Использовать auth.getUser()
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 const email = user?.email;
 
 // Получить профиль
-const { data: profile } = await supabase
-  .from('users')
-  .select('*')
-  .eq('id', user?.id)
-  .single();
+const { data: profile } = await supabase.from('users').select('*').eq('id', user?.id).single();
 
 // Вариант 2: JOIN через SQL (если нужно)
 const { data } = await supabase
   .from('users')
-  .select(`
+  .select(
+    `
     *,
     email:auth.users(email)
-  `)
+  `
+  )
   .eq('id', userId)
   .single();
 ```
@@ -537,17 +554,15 @@ const { data } = await supabase
 ### Добавление приема пищи
 
 ```typescript
-const { data, error } = await supabase
-  .from('food_diary')
-  .insert({
-    meal_type: 'breakfast',
-    food_name: 'Овсянка с бананом',
-    calories: 350,
-    protein: 12,
-    carbs: 58,
-    fats: 8,
-    meal_date: new Date().toISOString().split('T')[0]
-  });
+const { data, error } = await supabase.from('food_diary').insert({
+  meal_type: 'breakfast',
+  food_name: 'Овсянка с бананом',
+  calories: 350,
+  protein: 12,
+  carbs: 58,
+  fats: 8,
+  meal_date: new Date().toISOString().split('T')[0],
+});
 ```
 
 ### Получение статистики за день
@@ -558,12 +573,15 @@ const { data, error } = await supabase
   .select('calories, protein, carbs, fats')
   .eq('meal_date', new Date().toISOString().split('T')[0]);
 
-const totals = data.reduce((acc, meal) => ({
-  calories: acc.calories + (meal.calories || 0),
-  protein: acc.protein + (meal.protein || 0),
-  carbs: acc.carbs + (meal.carbs || 0),
-  fats: acc.fats + (meal.fats || 0),
-}), { calories: 0, protein: 0, carbs: 0, fats: 0 });
+const totals = data.reduce(
+  (acc, meal) => ({
+    calories: acc.calories + (meal.calories || 0),
+    protein: acc.protein + (meal.protein || 0),
+    carbs: acc.carbs + (meal.carbs || 0),
+    fats: acc.fats + (meal.fats || 0),
+  }),
+  { calories: 0, protein: 0, carbs: 0, fats: 0 }
+);
 ```
 
 ---
@@ -571,9 +589,11 @@ const totals = data.reduce((acc, meal) => ({
 ## Расширения для будущих версий
 
 ### v1.1 - Завершено ✅
+
 Физические параметры и цели пользователя добавлены в таблицу users.
 
 ### v1.2 - Рецепты
+
 ```sql
 CREATE TABLE recipes (
   id uuid PRIMARY KEY,
@@ -597,6 +617,7 @@ CREATE TABLE recipe_ingredients (
 ```
 
 ### v1.3 - Сохраненные планы питания
+
 ```sql
 CREATE TABLE meal_plans (
   id uuid PRIMARY KEY,
@@ -623,5 +644,6 @@ CREATE TABLE meal_plan_items (
 **Последнее обновление:** 2026-02-06
 
 **История изменений:**
+
 - v1.1.0: Добавлены физические параметры (рост, вес, возраст, пол), цели и уровень активности
 - v1.0.0: Базовая структура (users, chat_history, food_diary)

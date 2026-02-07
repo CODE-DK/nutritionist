@@ -68,6 +68,7 @@ supabase link --project-ref YOUR_PROJECT_ID
 ```
 
 **Как найти Project ID:**
+
 - Откройте ваш проект в https://app.supabase.com
 - Project ID это часть URL: `https://app.supabase.com/project/sltpiyphjwlawrabkcnh`
 - В данном случае: `sltpiyphjwlawrabkcnh`
@@ -87,6 +88,7 @@ supabase secrets set ANTHROPIC_API_KEY="ваш_anthropic_api_key"
 ```
 
 **Важно:** Используйте значения из `.env`:
+
 - `OPENAI_API_KEY` - для первой команды
 - `CLAUDE_API_KEY` - используйте его значение для `ANTHROPIC_API_KEY`
 
@@ -145,6 +147,7 @@ curl -i --location --request POST \
 ```
 
 Ожидаемый ответ:
+
 ```json
 {
   "message": "Средний банан (120г) содержит около 105 ккал...",
@@ -160,13 +163,13 @@ curl -i --location --request POST \
 
 ```bash
 # Установите зависимости (если еще не установлены)
-yarn install
+pnpm install
 
 # Запустите на iOS
-yarn ios
+pnpm ios
 
 # Или на Android
-yarn android
+pnpm android
 ```
 
 ## Возможные проблемы и решения
@@ -176,6 +179,7 @@ yarn android
 **Причина**: Edge Function не получает токен авторизации
 
 **Решение**:
+
 - Проверьте, что вы вошли в систему
 - Убедитесь, что токен передается в заголовке `Authorization: Bearer <token>`
 
@@ -184,6 +188,7 @@ yarn android
 **Причина**: Секрет не добавлен в Supabase
 
 **Решение**:
+
 ```bash
 supabase secrets set OPENAI_API_KEY=sk-your-key
 supabase functions deploy chat-gpt
@@ -194,6 +199,7 @@ supabase functions deploy chat-gpt
 **Причина**: RLS блокирует запрос
 
 **Решение**:
+
 - Проверьте политики в **Authentication → Policies**
 - Убедитесь, что пользователь авторизован
 - Проверьте, что `user_id` совпадает с `auth.uid()`
@@ -238,6 +244,7 @@ supabase functions deploy chat-gpt
 Теперь ваше приложение полностью интегрировано с Supabase и готово к использованию.
 
 Следующие шаги:
+
 1. Протестируйте регистрацию и вход
 2. Попробуйте отправить сообщение AI диетологу
 3. Добавьте прием пищи в дневник

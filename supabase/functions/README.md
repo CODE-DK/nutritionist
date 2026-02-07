@@ -23,6 +23,7 @@ functions/
 **Эндпоинт**: `POST /functions/v1/chat-gpt`
 
 **Требования**:
+
 - Авторизация через Supabase Auth
 - OPENAI_API_KEY в Secrets
 
@@ -35,6 +36,7 @@ functions/
 **Эндпоинт**: `POST /functions/v1/stripe-webhook`
 
 **Требования**:
+
 - STRIPE_SECRET_KEY в Secrets
 - STRIPE_WEBHOOK_SECRET в Secrets
 
@@ -112,6 +114,7 @@ curl -i --location --request POST \
 ## Мониторинг
 
 1. **Логи в реальном времени**:
+
    ```bash
    supabase functions logs chat-gpt --tail
    ```
@@ -123,11 +126,13 @@ curl -i --location --request POST \
 ## Лимиты
 
 **Free tier**:
+
 - 500,000 вызовов функций/месяц
 - 1 GB исходящего трафика
 - Таймаут: 150 секунд
 
 **Pro tier** ($25/мес):
+
 - 2,000,000 вызовов/месяц
 - 100 GB трафика
 - Таймаут: 400 секунд
@@ -135,6 +140,7 @@ curl -i --location --request POST \
 ## Best Practices
 
 1. **Всегда проверяйте авторизацию**:
+
    ```typescript
    const authHeader = req.headers.get('Authorization');
    const { user } = await supabase.auth.getUser();
@@ -142,6 +148,7 @@ curl -i --location --request POST \
    ```
 
 2. **Обрабатывайте CORS**:
+
    ```typescript
    const corsHeaders = {
      'Access-Control-Allow-Origin': '*',
@@ -150,6 +157,7 @@ curl -i --location --request POST \
    ```
 
 3. **Логируйте ошибки**:
+
    ```typescript
    try {
      // ...
@@ -160,12 +168,14 @@ curl -i --location --request POST \
    ```
 
 4. **Используйте environment variables**:
+
    ```typescript
    const API_KEY = Deno.env.get('API_KEY');
    if (!API_KEY) throw new Error('Missing API_KEY');
    ```
 
 5. **Таймауты для внешних API**:
+
    ```typescript
    const controller = new AbortController();
    const timeout = setTimeout(() => controller.abort(), 5000);

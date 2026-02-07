@@ -1,7 +1,9 @@
 // Loading Component - индикатор загрузки
 
 import React from 'react';
+
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+
 import { Typography, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -15,18 +17,18 @@ export default function Loading({ text, fullScreen = false }: LoadingProps) {
 
   const styles = StyleSheet.create({
     container: {
-      justifyContent: 'center',
       alignItems: 'center',
+      justifyContent: 'center',
       padding: Spacing.xl,
     },
     fullScreen: {
-      flex: 1,
       backgroundColor: theme.background,
+      flex: 1,
     },
     text: {
-      marginTop: Spacing.md,
-      fontSize: Typography.body.fontSize,
       color: theme.textSecondary,
+      fontSize: Typography.body.fontSize,
+      marginTop: Spacing.md,
     },
   });
 

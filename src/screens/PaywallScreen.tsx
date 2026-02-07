@@ -1,11 +1,14 @@
 // PaywallScreen - экран покупки Premium
 
 import React, { useState } from 'react';
+
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Button from '../components/Button';
 import { Typography, Spacing, BorderRadius, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
@@ -48,11 +51,9 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
   const handlePurchase = () => {
     analyticsService.track('paywall_viewed');
 
-    Alert.alert(
-      t('paywall.comingSoon'),
-      t('paywall.comingSoonMessage'),
-      [{ text: t('common.ok') }]
-    );
+    Alert.alert(t('paywall.comingSoon'), t('paywall.comingSoonMessage'), [
+      { text: t('common.ok') },
+    ]);
   };
 
   const handleClose = () => {
@@ -61,96 +62,73 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.white,
-    },
     closeButton: {
-      position: 'absolute',
-      top: 50,
-      right: Spacing.md,
-      zIndex: 10,
       padding: Spacing.sm,
+      position: 'absolute',
+      right: Spacing.md,
+      top: 50,
+      zIndex: 10,
+    },
+    container: {
+      backgroundColor: theme.white,
+      flex: 1,
     },
     content: {
       flex: 1,
       padding: Spacing.lg,
     },
-    hero: {
-      alignItems: 'center',
-      marginTop: Spacing.xxl,
-      marginBottom: Spacing.xl,
-    },
-    heroGradient: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: Spacing.md,
-      ...Shadows.level3,
-    },
-    heroEmoji: {
-      fontSize: 50,
-    },
-    title: {
-      ...Typography.h1,
-      marginBottom: Spacing.xs,
-    },
-    subtitle: {
-      ...Typography.bodyLarge,
-      color: theme.textSecondary,
-    },
-    features: {
-      marginBottom: Spacing.xl,
-    },
     featureItem: {
-      flexDirection: 'row',
       alignItems: 'center',
+      flexDirection: 'row',
       marginBottom: Spacing.md,
     },
     featureText: {
       ...Typography.bodyLarge,
       marginLeft: Spacing.md,
     },
-    plans: {
-      marginBottom: Spacing.lg,
+    features: {
+      marginBottom: Spacing.xl,
+    },
+    finePrint: {
+      ...Typography.caption,
+      color: theme.textSecondary,
+      marginBottom: Spacing.md,
+      textAlign: 'center',
+    },
+    hero: {
+      alignItems: 'center',
+      marginBottom: Spacing.xl,
+      marginTop: Spacing.xxl,
+    },
+    heroEmoji: {
+      fontSize: 50,
+    },
+    heroGradient: {
+      alignItems: 'center',
+      borderRadius: 50,
+      height: 100,
+      justifyContent: 'center',
+      marginBottom: Spacing.md,
+      width: 100,
+      ...Shadows.level3,
     },
     planCard: {
       backgroundColor: theme.background,
-      borderWidth: 2,
       borderColor: theme.border,
       borderRadius: BorderRadius.large,
-      padding: Spacing.md,
+      borderWidth: 2,
       marginBottom: Spacing.md,
+      padding: Spacing.md,
     },
     planCardSelected: {
-      borderColor: theme.primary,
       backgroundColor: theme.primaryLight,
+      borderColor: theme.primary,
     },
     planHeader: {
+      alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
       marginBottom: Spacing.sm,
-    },
-    planTitle: {
-      ...Typography.h3,
-      flex: 1,
-    },
-    planTitleSelected: {
-      color: theme.primary,
-    },
-    recommendedBadge: {
-      backgroundColor: theme.primary,
-      paddingHorizontal: Spacing.sm,
-      paddingVertical: Spacing.xs / 2,
-      borderRadius: BorderRadius.pill,
-    },
-    recommendedText: {
-      ...Typography.caption,
-      color: theme.white,
-      fontWeight: '600',
     },
     planPrice: {
       ...Typography.h2,
@@ -163,37 +141,60 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
       ...Typography.body,
       color: theme.success,
     },
-    radioContainer: {
-      position: 'absolute',
-      top: Spacing.md,
-      right: Spacing.md,
+    planTitle: {
+      ...Typography.h3,
+      flex: 1,
     },
-    radioOuter: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: theme.border,
-      justifyContent: 'center',
-      alignItems: 'center',
+    planTitleSelected: {
+      color: theme.primary,
     },
-    radioOuterSelected: {
-      borderColor: theme.primary,
-    },
-    radioInner: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      backgroundColor: theme.primary,
+    plans: {
+      marginBottom: Spacing.lg,
     },
     purchaseButton: {
       marginBottom: Spacing.md,
     },
-    finePrint: {
+    radioContainer: {
+      position: 'absolute',
+      right: Spacing.md,
+      top: Spacing.md,
+    },
+    radioInner: {
+      backgroundColor: theme.primary,
+      borderRadius: 6,
+      height: 12,
+      width: 12,
+    },
+    radioOuter: {
+      alignItems: 'center',
+      borderColor: theme.border,
+      borderRadius: 12,
+      borderWidth: 2,
+      height: 24,
+      justifyContent: 'center',
+      width: 24,
+    },
+    radioOuterSelected: {
+      borderColor: theme.primary,
+    },
+    recommendedBadge: {
+      backgroundColor: theme.primary,
+      borderRadius: BorderRadius.pill,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: Spacing.xs / 2,
+    },
+    recommendedText: {
       ...Typography.caption,
+      color: theme.white,
+      fontWeight: '600',
+    },
+    subtitle: {
+      ...Typography.bodyLarge,
       color: theme.textSecondary,
-      textAlign: 'center',
-      marginBottom: Spacing.md,
+    },
+    title: {
+      ...Typography.h1,
+      marginBottom: Spacing.xs,
     },
   });
 
@@ -232,20 +233,16 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
 
         {/* Plans */}
         <View style={styles.plans}>
-          {PLANS.map((plan) => (
+          {PLANS.map(plan => (
             <TouchableOpacity
               key={plan.id}
-              style={[
-                styles.planCard,
-                selectedPlan === plan.id && styles.planCardSelected,
-              ]}
+              style={[styles.planCard, selectedPlan === plan.id && styles.planCardSelected]}
               onPress={() => setSelectedPlan(plan.id)}
             >
               <View style={styles.planHeader}>
-                <Text style={[
-                  styles.planTitle,
-                  selectedPlan === plan.id && styles.planTitleSelected,
-                ]}>
+                <Text
+                  style={[styles.planTitle, selectedPlan === plan.id && styles.planTitleSelected]}
+                >
                   {plan.title}
                 </Text>
                 {plan.recommended && (
@@ -255,23 +252,19 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
                 )}
               </View>
 
-              <Text style={[
-                styles.planPrice,
-                selectedPlan === plan.id && styles.planPriceSelected,
-              ]}>
+              <Text
+                style={[styles.planPrice, selectedPlan === plan.id && styles.planPriceSelected]}
+              >
                 {plan.price}
               </Text>
 
-              {plan.savings && (
-                <Text style={styles.planSavings}>{plan.savings}</Text>
-              )}
+              {plan.savings && <Text style={styles.planSavings}>{plan.savings}</Text>}
 
               {/* Radio button */}
               <View style={styles.radioContainer}>
-                <View style={[
-                  styles.radioOuter,
-                  selectedPlan === plan.id && styles.radioOuterSelected,
-                ]}>
+                <View
+                  style={[styles.radioOuter, selectedPlan === plan.id && styles.radioOuterSelected]}
+                >
                   {selectedPlan === plan.id && <View style={styles.radioInner} />}
                 </View>
               </View>
@@ -287,9 +280,7 @@ export default function PaywallScreen({ onClose }: PaywallScreenProps) {
         />
 
         {/* Fine Print */}
-        <Text style={styles.finePrint}>
-          {t('paywall.cancelAnytime')}
-        </Text>
+        <Text style={styles.finePrint}>{t('paywall.cancelAnytime')}</Text>
 
         {/* Restore Purchases */}
         <Button

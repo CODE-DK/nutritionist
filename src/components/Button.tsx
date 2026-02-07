@@ -1,6 +1,7 @@
 // Button Component - согласно DESIGN.md
 
 import React from 'react';
+
 import {
   TouchableOpacity,
   Text,
@@ -9,6 +10,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+
 import { Typography, BorderRadius, Shadows, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -119,12 +121,12 @@ export default function Button({
 
 const styles = StyleSheet.create({
   base: {
-    height: 48,
-    borderRadius: BorderRadius.medium,
-    paddingHorizontal: Spacing.lg,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: BorderRadius.medium,
     flexDirection: 'row',
+    height: 48,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
   },
   baseText: {
     fontSize: Typography.button.fontSize,

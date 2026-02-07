@@ -5,12 +5,14 @@
 ### ✅ Что готово:
 
 **Инфраструктура:**
+
 - i18next + react-i18next настроены
 - Переключатель языка в профиле (Профиль → Язык)
 - Автосохранение выбранного языка в AsyncStorage
 - Все переводы для ВСЕХ экранов готовы
 
 **Полностью локализованные компоненты (8/8):**
+
 - ✅ ProfileScreen
 - ✅ ProfileEditModals (все 4 модальных окна)
 - ✅ PaywallScreen
@@ -22,6 +24,7 @@
 - ✅ getGoalTypeLabel() / getActivityLevelLabel()
 
 **Файлы переводов:**
+
 - [src/locales/ru.ts](src/locales/ru.ts) - русский (полный)
 - [src/locales/en.ts](src/locales/en.ts) - английский (полный)
 - [src/config/i18n.ts](src/config/i18n.ts) - конфигурация

@@ -5,8 +5,8 @@
  * для использования во всем приложении.
  */
 
-import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
 
 // Конфигурация из переменных окружения
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
@@ -15,7 +15,9 @@ const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 // Проверка наличия обязательных переменных
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('❌ Supabase credentials are missing!');
-  console.error('Please add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to your .env file');
+  console.error(
+    'Please add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to your .env file'
+  );
 }
 
 /**

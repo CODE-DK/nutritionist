@@ -1,6 +1,7 @@
 // DiaryScreen - экран дневника питания
 
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -10,17 +11,20 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import StatsCard from '../components/StatsCard';
-import MealCard from '../components/MealCard';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import AddMealModal from '../components/AddMealModal';
 import Loading from '../components/Loading';
+import MealCard from '../components/MealCard';
+import StatsCard from '../components/StatsCard';
 import { Typography, Spacing, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 import diaryService from '../services/diaryService';
+
 import type { DailyStats, FoodEntry } from '../types';
 
 interface DiaryScreenProps {
@@ -103,25 +107,21 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
   };
 
   const handleDeleteMeal = (meal: FoodEntry) => {
-    Alert.alert(
-      t('diary.addMealModal.deleteMeal'),
-      t('diary.addMealModal.deleteConfirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await diaryService.deleteMeal(meal.id);
-              await loadStats();
-            } catch (error: any) {
-              Alert.alert(t('common.error'), error.message || t('common.error'));
-            }
-          },
+    Alert.alert(t('diary.addMealModal.deleteMeal'), t('diary.addMealModal.deleteConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await diaryService.deleteMeal(meal.id);
+            await loadStats();
+          } catch (error: any) {
+            Alert.alert(t('common.error'), error.message || t('common.error'));
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSaveMeal = async (meal: Omit<FoodEntry, 'id' | 'timestamp'>) => {
@@ -141,66 +141,66 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.background,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.md,
-      backgroundColor: theme.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
-    },
-    headerTitle: {
-      ...Typography.h3,
-      color: theme.text,
+      flex: 1,
     },
     content: {
       flex: 1,
       padding: Spacing.md,
     },
     dateSelector: {
+      alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
       paddingVertical: Spacing.md,
     },
     dateText: {
       ...Typography.bodyLarge,
-      fontWeight: '600',
       color: theme.text,
-    },
-    emptyState: {
-      alignItems: 'center',
-      paddingVertical: Spacing.xxl,
+      fontWeight: '600',
     },
     emptyEmoji: {
       fontSize: 64,
       marginBottom: Spacing.md,
     },
-    emptyTitle: {
-      ...Typography.h3,
-      marginBottom: Spacing.sm,
-      color: theme.text,
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: Spacing.xxl,
     },
     emptyText: {
       ...Typography.body,
-      textAlign: 'center',
       color: theme.textSecondary,
+      textAlign: 'center',
+    },
+    emptyTitle: {
+      ...Typography.h3,
+      color: theme.text,
+      marginBottom: Spacing.sm,
     },
     fab: {
-      position: 'absolute',
+      alignItems: 'center',
+      backgroundColor: theme.primary,
+      borderRadius: 28,
       bottom: Spacing.lg,
+      height: 56,
+      justifyContent: 'center',
+      position: 'absolute',
       right: Spacing.lg,
       width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: theme.primary,
-      justifyContent: 'center',
+    },
+    header: {
       alignItems: 'center',
+      backgroundColor: theme.surface,
+      borderBottomColor: theme.border,
+      borderBottomWidth: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.md,
+    },
+    headerTitle: {
+      ...Typography.h3,
+      color: theme.text,
     },
   });
 
@@ -218,7 +218,11 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+          />
         }
       >
         {/* Stats Card */}
@@ -243,7 +247,7 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
 
         {/* Meals List */}
         {stats && stats.meals.length > 0 ? (
-          stats.meals.map((meal) => (
+          stats.meals.map(meal => (
             <MealCard
               key={meal.id}
               meal={meal}

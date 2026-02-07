@@ -7,6 +7,7 @@
 **Решение:** Добавить фото-распознавание еды через Claude Vision API, которое автоматически определяет блюдо и рассчитывает калории/БЖУ. Это снизит friction с 10+ кликов до 2 кликов и повысит 7-day retention до 40-50%.
 
 **Бизнес-ценность:**
+
 - Retention: 15-20% → 40-50% (2.5x improvement)
 - Монетизация: лимит 5 фото/день для Free → естественный paywall для Premium
 - УТП: Уникальная комбинация AI фото + AI консультант (конкуренты так не умеют)
@@ -69,13 +70,13 @@ diaryService.addMeal(): save с photo_url + ai_confidence
 **Задача:** Добавить библиотеки для работы с фото и AI.
 
 ```bash
-npx expo install expo-image-picker expo-camera expo-file-system
-npm install @anthropic-ai/sdk
+pnpm expo install expo-image-picker expo-camera expo-file-system
+pnpm add @anthropic-ai/sdk
 ```
 
 **Обновить:** `/package.json` будет содержать новые dependencies.
 
-**Проверка:** `npm list expo-image-picker` должен показать версию.
+**Проверка:** `pnpm list expo-image-picker` должен показать версию.
 
 ---
 
@@ -84,7 +85,9 @@ npm install @anthropic-ai/sdk
 **Файл:** `/supabase/migrations/003_add_photo_support.sql` (CREATE)
 
 **Содержание:**
+
 1. Расширить `food_diary`:
+
    ```sql
    ALTER TABLE food_diary
      ADD COLUMN photo_url TEXT,
@@ -93,6 +96,7 @@ npm install @anthropic-ai/sdk
    ```
 
 2. Создать таблицу `photo_usage` для лимитов:
+
    ```sql
    CREATE TABLE photo_usage (
      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -109,6 +113,7 @@ npm install @anthropic-ai/sdk
    - Storage bucket `food-photos`: user can INSERT/SELECT/DELETE only own folder
 
 4. PostgreSQL Function:
+
    ```sql
    CREATE FUNCTION increment_photo_usage(p_user_id UUID, p_date DATE)
    RETURNS void AS $$
@@ -126,6 +131,7 @@ npm install @anthropic-ai/sdk
    ```
 
 **Применить:**
+
 ```bash
 cd supabase
 supabase db push
@@ -140,8 +146,10 @@ supabase db push
 **Задача:** Создать bucket для фото через Supabase Dashboard.
 
 **Через Dashboard:**
+
 1. Storage → Create Bucket → Name: `food-photos`, Public: true
 2. SQL Editor → Run policies:
+
    ```sql
    CREATE POLICY "Users upload to own folder" ON storage.objects FOR INSERT
      WITH CHECK (bucket_id = 'food-photos' AND auth.uid()::text = (storage.foldername(name))[1]);
@@ -154,6 +162,7 @@ supabase db push
    ```
 
 **Bucket settings:**
+
 - Max file size: 2MB
 - Allowed MIME types: image/jpeg, image/png
 
@@ -166,6 +175,7 @@ supabase db push
 **Файл:** `/supabase/functions/analyze-food-photo/index.ts` (CREATE)
 
 **Структура:** Скопировать паттерн из `/supabase/functions/chat-gpt/index.ts`:
+
 - CORS handling (OPTIONS preflight)
 - JWT auth через `supabase.auth.getUser()`
 - Error handling на всех уровнях
@@ -179,7 +189,7 @@ import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.20.0';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 
-serve(async (req) => {
+serve(async req => {
   // 1. CORS + JWT auth (как в chat-gpt)
   // 2. Parse body: { image: base64, userId: uuid }
   // 3. Check photo limit: call checkPhotoLimit()
@@ -188,13 +198,15 @@ serve(async (req) => {
   const message = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20250219',
     max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
-        { type: 'text', text: FOOD_RECOGNITION_PROMPT }
-      ]
-    }]
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
+          { type: 'text', text: FOOD_RECOGNITION_PROMPT },
+        ],
+      },
+    ],
   });
   // 5. Parse JSON response (extract from markdown if needed)
   // 6. Validate: dish_name required, calories 0-5000, confidence 0-1
@@ -204,6 +216,7 @@ serve(async (req) => {
 ```
 
 **Промпт:**
+
 ```typescript
 const FOOD_RECOGNITION_PROMPT = `Проанализируй это фото еды и верни JSON с данными о блюде.
 
@@ -227,12 +240,14 @@ const FOOD_RECOGNITION_PROMPT = `Проанализируй это фото ед
 ```
 
 **Deploy:**
+
 ```bash
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase functions deploy analyze-food-photo
 ```
 
 **Проверка:**
+
 ```bash
 curl -i --location --request POST \
   'https://YOUR_PROJECT.supabase.co/functions/v1/analyze-food-photo' \
@@ -288,6 +303,7 @@ class PhotoService {
 ```
 
 **Error handling:** Wrap в try-catch, возвращать ApiError с code:
+
 - `CAMERA_PERMISSION_DENIED`
 - `LOW_CONFIDENCE` (< 0.3)
 - `PHOTO_LIMIT_EXCEEDED`
@@ -295,6 +311,7 @@ class PhotoService {
 - `EDGE_FUNCTION_ERROR`
 
 **Использовать существующие паттерны:**
+
 - Error handling как в `/src/services/aiService.ts`
 - API calls через `supabase.functions.invoke()` как в aiService
 - Типы из `/src/types/index.ts`
@@ -306,6 +323,7 @@ class PhotoService {
 **Файл:** `/src/components/PhotoCaptureModal.tsx` (CREATE)
 
 **Props:**
+
 ```typescript
 interface PhotoCaptureModalProps {
   visible: boolean;
@@ -315,6 +333,7 @@ interface PhotoCaptureModalProps {
 ```
 
 **States:**
+
 - `idle`: показать кнопки "📷 Камера" / "🖼 Галерея"
 - `capturing`: expo-image-picker open (handled by OS)
 - `preview`: превью фото + кнопки "Повторить" / "Анализировать"
@@ -323,12 +342,14 @@ interface PhotoCaptureModalProps {
 - `error`: обработка ошибок (низкий confidence, нет еды, API error)
 
 **UI components:** Переиспользовать:
+
 - `Button` из `/src/components/Button.tsx`
 - `Loading` из `/src/components/Loading.tsx`
 - `Colors, Typography, Spacing` из `/src/config/theme.ts`
 - `useTheme()` из `/src/config/ThemeContext.tsx`
 
 **Флоу:**
+
 ```typescript
 const handleCameraPress = async () => {
   const uri = await photoService.capturePhoto();
@@ -365,12 +386,14 @@ const handleAnalyze = async () => {
 **Изменения:**
 
 1. **Новые imports:**
+
    ```typescript
    import PhotoCaptureModal from './PhotoCaptureModal';
    import photoService from '../services/photoService';
    ```
 
 2. **Новые states:**
+
    ```typescript
    const [photoModalVisible, setPhotoModalVisible] = useState(false);
    const [photoResult, setPhotoResult] = useState<PhotoAnalysisResult | null>(null);
@@ -378,6 +401,7 @@ const handleAnalyze = async () => {
    ```
 
 3. **useEffect для загрузки лимита:**
+
    ```typescript
    useEffect(() => {
      if (visible && userId) {
@@ -396,6 +420,7 @@ const handleAnalyze = async () => {
    ```
 
 4. **Кнопка фото (добавить ПЕРЕД "Тип приема пищи"):**
+
    ```typescript
    {/* Photo Button */}
    <TouchableOpacity
@@ -419,6 +444,7 @@ const handleAnalyze = async () => {
    ```
 
 5. **Callback после анализа:**
+
    ```typescript
    const handlePhotoAnalyzed = (result: PhotoAnalysisResult) => {
      setPhotoResult(result);
@@ -442,6 +468,7 @@ const handleAnalyze = async () => {
    ```
 
 6. **Превью фото в форме (после БЖУ inputs):**
+
    ```typescript
    {photoResult && (
      <View style={styles.aiIndicator}>
@@ -461,6 +488,7 @@ const handleAnalyze = async () => {
    ```
 
 7. **Обновить handleSave:**
+
    ```typescript
    const meal: Omit<FoodEntry, 'id' | 'timestamp'> = {
      // ... existing fields
@@ -496,10 +524,10 @@ export interface PhotoAnalysisResult {
   protein: number;
   carbs: number;
   fat: number;
-  confidence: number;  // 0.0 - 1.0
+  confidence: number; // 0.0 - 1.0
   reasoning: string;
-  photoUri: string;    // Local URI
-  photoUrl?: string;   // Storage URL
+  photoUri: string; // Local URI
+  photoUrl?: string; // Storage URL
 }
 
 export interface PhotoUsage {
@@ -551,6 +579,7 @@ export const PHOTO_CONFIG = {
 **Изменения:**
 
 1. В `addMeal()` и `updateMeal()` добавить mapping для новых полей:
+
    ```typescript
    const insertData = {
      // ... existing fields
@@ -576,7 +605,7 @@ export const PHOTO_CONFIG = {
 
 ### Test Case 1: Успешное распознавание фото
 
-1. Запустить app: `npm start` → iOS simulator
+1. Запустить app: `pnpm start` → iOS simulator
 2. Открыть DiaryScreen → tap FAB "+" (Add Meal)
 3. В AddMealModal → tap кнопку "📸 Сфотографировать"
 4. PhotoCaptureModal появился → tap "Камера" (или "Галерея" в simulator)
@@ -655,17 +684,20 @@ LIMIT 5;
 ## Success Metrics (после 2 недель)
 
 **Primary:**
+
 - ✓ Photo Usage Rate: ≥40% пользователей использовали фото
 - ✓ Photo Success Rate: ≥70% фото с confidence >0.5
 - ✓ Edit Rate: ≤30% пользователей редактируют AI результаты
 
 **Secondary:**
+
 - Average confidence: ≥0.75
 - Processing time: ≤4 сек (p95)
 - Error rate: ≤5%
 - Cost per photo: ≤$0.01
 
 **Business (после 90 дней):**
+
 - 7-Day Retention: ≥40% (up from 20%)
 - Photo Limit Conversion: ≥20% hit limit → view paywall
 - Premium Conversions: ≥5% upgrade to Premium
@@ -677,11 +709,13 @@ LIMIT 5;
 Если возникнут критические проблемы:
 
 1. **Disable Edge Function:**
+
    ```bash
    supabase functions delete analyze-food-photo
    ```
 
 2. **Hide UI:** В AddMealModal добавить feature flag:
+
    ```typescript
    const PHOTO_FEATURE_ENABLED = false;
    {PHOTO_FEATURE_ENABLED && <PhotoButton />}

@@ -69,15 +69,6 @@ class AnalyticsService {
    * Отследить событие (логирование в консоль)
    */
   track(eventName: EventName, properties?: EventProperties): void {
-    const event = {
-      name: eventName,
-      properties: {
-        ...properties,
-        userId: this.userId || 'anonymous',
-      },
-      timestamp: new Date().toISOString(),
-    };
-
     console.log('[Analytics] Event tracked:', eventName, properties);
 
     // В будущем здесь можно добавить отправку в Amplitude, Mixpanel и т.д.
@@ -133,7 +124,7 @@ class AnalyticsService {
 
       // Группируем по дням и считаем среднее
       const dailyCalories: Record<string, number> = {};
-      (recentMeals || []).forEach((meal) => {
+      (recentMeals || []).forEach(meal => {
         const date = meal.meal_date;
         dailyCalories[date] = (dailyCalories[date] || 0) + (meal.calories || 0);
       });
@@ -204,7 +195,7 @@ class AnalyticsService {
       }
 
       // Заполняем данные по приемам пищи
-      (meals || []).forEach((meal) => {
+      (meals || []).forEach(meal => {
         const date = meal.meal_date;
         if (statsByDate[date]) {
           statsByDate[date].meals++;
@@ -213,7 +204,7 @@ class AnalyticsService {
       });
 
       // Заполняем данные по AI сообщениям
-      (messages || []).forEach((msg) => {
+      (messages || []).forEach(msg => {
         const date = msg.created_at.split('T')[0];
         if (statsByDate[date]) {
           statsByDate[date].aiMessages++;
@@ -233,11 +224,16 @@ class AnalyticsService {
   /**
    * Получить топ продуктов по калориям
    */
-  async getTopFoods(userId: string, limit: number = 10): Promise<Array<{
-    name: string;
-    count: number;
-    totalCalories: number;
-  }>> {
+  async getTopFoods(
+    userId: string,
+    limit: number = 10
+  ): Promise<
+    Array<{
+      name: string;
+      count: number;
+      totalCalories: number;
+    }>
+  > {
     try {
       const { data } = await supabase
         .from('food_diary')
@@ -250,7 +246,7 @@ class AnalyticsService {
 
       // Группируем по названию
       const foodStats: Record<string, { count: number; totalCalories: number }> = {};
-      data.forEach((meal) => {
+      data.forEach(meal => {
         const name = meal.food_name;
         if (!foodStats[name]) {
           foodStats[name] = { count: 0, totalCalories: 0 };
@@ -302,7 +298,7 @@ class AnalyticsService {
       let monthCount = 0;
       let totalTokens = 0;
 
-      data.forEach((msg) => {
+      data.forEach(msg => {
         const msgDate = new Date(msg.created_at);
         const msgDateStr = msg.created_at.split('T')[0];
 

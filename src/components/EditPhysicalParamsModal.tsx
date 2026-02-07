@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+
 import {
   View,
   Text,
@@ -15,11 +16,14 @@ import {
   ScrollView,
   Switch,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+
 import Button from './Button';
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
+
 import type { User, Gender } from '../types';
 
 interface EditPhysicalParamsModalProps {
@@ -92,9 +96,7 @@ export default function EditPhysicalParamsModal({
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>
-              Физические параметры
-            </Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Физические параметры</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
@@ -161,7 +163,9 @@ export default function EditPhysicalParamsModal({
                   <Text style={styles.genderEmoji}>👨</Text>
                   <Text style={[styles.genderText, { color: theme.text }]}>Мужской</Text>
                 </View>
-                {gender === 'male' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+                {gender === 'male' && (
+                  <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -176,7 +180,9 @@ export default function EditPhysicalParamsModal({
                   <Text style={styles.genderEmoji}>👩</Text>
                   <Text style={[styles.genderText, { color: theme.text }]}>Женский</Text>
                 </View>
-                {gender === 'female' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+                {gender === 'female' && (
+                  <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+                )}
               </TouchableOpacity>
             </View>
 
@@ -204,7 +210,11 @@ export default function EditPhysicalParamsModal({
             )}
 
             {/* Кнопка сохранения */}
-            <Button title={t('common.save')} onPress={handleSave} style={{ marginTop: Spacing.md }} />
+            <Button
+              title={t('common.save')}
+              onPress={handleSave}
+              style={{ marginTop: Spacing.md }}
+            />
           </ScrollView>
         </View>
       </View>
@@ -213,83 +223,83 @@ export default function EditPhysicalParamsModal({
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  genderContainer: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.large,
-    borderTopRightRadius: BorderRadius.large,
-    padding: Spacing.lg,
-    maxHeight: '85%',
+  genderEmoji: {
+    fontSize: 24,
+    marginRight: Spacing.md,
   },
-  modalHeader: {
+  genderLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  genderOption: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
+    padding: Spacing.md,
   },
-  modalTitle: {
-    ...Typography.h2,
+  genderText: {
+    ...Typography.bodyLarge,
+  },
+  input: {
+    ...Typography.bodyLarge,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    marginBottom: Spacing.xs,
+    padding: Spacing.md,
   },
   label: {
     ...Typography.bodyLarge,
     marginBottom: Spacing.sm,
     marginTop: Spacing.md,
   },
-  input: {
-    ...Typography.bodyLarge,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
-    marginBottom: Spacing.xs,
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.large,
+    borderTopRightRadius: BorderRadius.large,
+    maxHeight: '85%',
+    padding: Spacing.lg,
   },
-  genderContainer: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  genderOption: {
+  modalHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
+    marginBottom: Spacing.lg,
   },
-  genderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  modalOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'flex-end',
   },
-  genderEmoji: {
-    fontSize: 24,
-    marginRight: Spacing.md,
-  },
-  genderText: {
-    ...Typography.bodyLarge,
+  modalTitle: {
+    ...Typography.h2,
   },
   recalculateContainer: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
     marginTop: Spacing.md,
+    padding: Spacing.md,
   },
   recalculateLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     flex: 1,
-  },
-  recalculateTextContainer: {
-    marginLeft: Spacing.md,
-    flex: 1,
-  },
-  recalculateTitle: {
-    ...Typography.bodyLarge,
   },
   recalculateSubtitle: {
     ...Typography.caption,
     marginTop: 2,
+  },
+  recalculateTextContainer: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  recalculateTitle: {
+    ...Typography.bodyLarge,
   },
 });

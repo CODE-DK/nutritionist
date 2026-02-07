@@ -1,8 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ru from '../locales/ru';
+
 import en from '../locales/en';
+import ru from '../locales/ru';
 
 const LANGUAGE_KEY = '@app_language';
 
@@ -13,20 +14,18 @@ export const LANGUAGES = {
 };
 
 // Инициализация i18n
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      ru,
-      en,
-    },
-    lng: 'ru', // Язык по умолчанию
-    fallbackLng: 'ru',
-    compatibilityJSON: 'v3',
-    interpolation: {
-      escapeValue: false, // React уже экранирует значения
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    ru,
+    en,
+  },
+  lng: 'ru', // Язык по умолчанию
+  fallbackLng: 'ru',
+  compatibilityJSON: 'v3',
+  interpolation: {
+    escapeValue: false, // React уже экранирует значения
+  },
+});
 
 // Функция для загрузки сохраненного языка
 export const loadLanguage = async () => {

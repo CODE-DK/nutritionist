@@ -1,6 +1,7 @@
 // AddMealModal - модальное окно для добавления/редактирования приема пищи
 
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -13,14 +14,17 @@ import {
   Alert,
   Image,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import Input from './Input';
+
 import Button from './Button';
+import Input from './Input';
 import PhotoCaptureModal from './PhotoCaptureModal';
 import { Typography, BorderRadius, Spacing, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 import photoService from '../services/photoService';
+
 import type { MealType, FoodEntry, PhotoAnalysisResult, PhotoUsage } from '../types';
 
 interface AddMealModalProps {
@@ -66,58 +70,44 @@ export default function AddMealModal({
   const isEditing = !!editingMeal;
 
   const styles = StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalContainer: {
-      backgroundColor: theme.white,
-      borderTopLeftRadius: BorderRadius.large,
-      borderTopRightRadius: BorderRadius.large,
-      maxHeight: '90%',
-      ...Shadows.level3,
+    content: {
+      padding: Spacing.lg,
     },
     header: {
+      alignItems: 'center',
+      borderBottomColor: theme.border,
+      borderBottomWidth: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
     },
     headerTitle: {
       ...Typography.h3,
     },
-    content: {
-      padding: Spacing.lg,
+    macrosRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.md,
     },
-    sectionLabel: {
-      ...Typography.body,
-      fontWeight: '600',
-      color: theme.text,
-      marginBottom: Spacing.sm,
-      marginTop: Spacing.sm,
+    mealTypeButton: {
+      alignItems: 'center',
+      backgroundColor: theme.white,
+      borderColor: theme.border,
+      borderRadius: BorderRadius.medium,
+      borderWidth: 2,
+      flex: 1,
+      marginHorizontal: Spacing.xs,
+      padding: Spacing.md,
+    },
+    mealTypeButtonActive: {
+      backgroundColor: theme.primaryLight,
+      borderColor: theme.primary,
     },
     mealTypeContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: Spacing.lg,
-    },
-    mealTypeButton: {
-      flex: 1,
-      alignItems: 'center',
-      padding: Spacing.md,
-      marginHorizontal: Spacing.xs,
-      borderRadius: BorderRadius.medium,
-      borderWidth: 2,
-      borderColor: theme.border,
-      backgroundColor: theme.white,
-    },
-    mealTypeButtonActive: {
-      borderColor: theme.primary,
-      backgroundColor: theme.primaryLight,
     },
     mealTypeEmoji: {
       fontSize: 32,
@@ -131,36 +121,50 @@ export default function AddMealModal({
       color: theme.primary,
       fontWeight: '600',
     },
-    macrosRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: Spacing.md,
-    },
     macroInput: {
       flex: 1,
       marginHorizontal: Spacing.xs,
     },
+    modalContainer: {
+      backgroundColor: theme.white,
+      borderTopLeftRadius: BorderRadius.large,
+      borderTopRightRadius: BorderRadius.large,
+      maxHeight: '90%',
+      ...Shadows.level3,
+    },
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    sectionLabel: {
+      ...Typography.body,
+      color: theme.text,
+      fontWeight: '600',
+      marginBottom: Spacing.sm,
+      marginTop: Spacing.sm,
+    },
     buttonContainer: {
-      marginTop: Spacing.lg,
       gap: Spacing.md,
+      marginTop: Spacing.lg,
     },
     saveButton: {
       marginBottom: Spacing.sm,
     },
     // Photo button styles
     photoButton: {
-      flexDirection: 'row',
       alignItems: 'center',
-      padding: Spacing.md,
-      marginBottom: Spacing.lg,
+      backgroundColor: theme.primaryLight,
+      borderColor: theme.primary,
       borderRadius: BorderRadius.medium,
       borderWidth: 2,
-      borderColor: theme.primary,
-      backgroundColor: theme.primaryLight,
+      flexDirection: 'row',
+      marginBottom: Spacing.lg,
+      padding: Spacing.md,
     },
     photoButtonDisabled: {
-      borderColor: theme.border,
       backgroundColor: theme.border,
+      borderColor: theme.border,
       opacity: 0.6,
     },
     photoButtonTextContainer: {
@@ -169,8 +173,8 @@ export default function AddMealModal({
     },
     photoButtonText: {
       ...Typography.bodyLarge,
-      fontWeight: '600',
       color: theme.text,
+      fontWeight: '600',
       marginBottom: Spacing.xs,
     },
     photoCounter: {
@@ -179,20 +183,20 @@ export default function AddMealModal({
     },
     // Limit banner styles
     limitBanner: {
-      flexDirection: 'row',
       alignItems: 'center',
-      padding: Spacing.md,
-      marginBottom: Spacing.lg,
-      borderRadius: BorderRadius.medium,
       backgroundColor: theme.warningLight || '#FFF3CD',
+      borderRadius: BorderRadius.medium,
+      flexDirection: 'row',
+      marginBottom: Spacing.lg,
+      padding: Spacing.md,
     },
     limitBannerTextContainer: {
       marginLeft: Spacing.md,
     },
     limitBannerText: {
       ...Typography.body,
-      fontWeight: '600',
       color: theme.warning,
+      fontWeight: '600',
     },
     limitBannerSubtext: {
       ...Typography.caption,
@@ -200,42 +204,42 @@ export default function AddMealModal({
     },
     // AI indicator styles
     aiIndicator: {
-      flexDirection: 'row',
       alignItems: 'center',
-      padding: Spacing.sm,
-      marginBottom: Spacing.md,
-      borderRadius: BorderRadius.small,
       backgroundColor: theme.primaryLight,
+      borderRadius: BorderRadius.small,
+      flexDirection: 'row',
+      marginBottom: Spacing.md,
+      padding: Spacing.sm,
     },
     aiIndicatorText: {
       ...Typography.caption,
       color: theme.primary,
-      marginLeft: Spacing.xs,
       fontWeight: '600',
+      marginLeft: Spacing.xs,
     },
     // Photo preview styles
     photoPreviewContainer: {
       marginBottom: Spacing.md,
     },
     photoPreview: {
-      width: '100%',
-      height: 200,
+      backgroundColor: theme.border,
       borderRadius: BorderRadius.medium,
+      height: 200,
       overflow: 'hidden',
       position: 'relative',
-      backgroundColor: theme.border,
+      width: '100%',
     },
     photoImage: {
-      width: '100%',
       height: '100%',
       resizeMode: 'cover',
+      width: '100%',
     },
     photoRemoveButton: {
-      position: 'absolute',
-      top: Spacing.sm,
-      right: Spacing.sm,
       backgroundColor: 'rgba(255, 255, 255, 0.9)',
       borderRadius: 14,
+      position: 'absolute',
+      right: Spacing.sm,
+      top: Spacing.sm,
     },
   });
 
@@ -311,15 +315,9 @@ export default function AddMealModal({
 
     // Показать индикатор AI
     if (result.confidence >= 0.7) {
-      Alert.alert(
-        t('common.success'),
-        `${Math.round(result.confidence * 100)}%`
-      );
+      Alert.alert(t('common.success'), `${Math.round(result.confidence * 100)}%`);
     } else {
-      Alert.alert(
-        t('common.error'),
-        `${Math.round(result.confidence * 100)}%`
-      );
+      Alert.alert(t('common.error'), `${Math.round(result.confidence * 100)}%`);
     }
 
     setPhotoModalVisible(false);
@@ -406,12 +404,7 @@ export default function AddMealModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={handleClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
@@ -449,25 +442,21 @@ export default function AddMealModal({
                     color={photoUsage.remaining === 0 ? theme.textSecondary : theme.primary}
                   />
                   <View style={styles.photoButtonTextContainer}>
-                    <Text style={styles.photoButtonText}>{t('diary.addMealModal.photoButton')}</Text>
+                    <Text style={styles.photoButtonText}>
+                      {t('diary.addMealModal.photoButton')}
+                    </Text>
                     <Text style={styles.photoCounter}>
                       {photoUsage.remaining}/{photoUsage.limit}
                     </Text>
                   </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={theme.textSecondary}
-                  />
+                  <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
                 </TouchableOpacity>
 
                 {photoUsage.remaining === 0 && (
                   <View style={styles.limitBanner}>
                     <Ionicons name="lock-closed" size={20} color={theme.warning} />
                     <View style={styles.limitBannerTextContainer}>
-                      <Text style={styles.limitBannerText}>
-                        {t('chat.limitReached')}
-                      </Text>
+                      <Text style={styles.limitBannerText}>{t('chat.limitReached')}</Text>
                       <Text style={styles.limitBannerSubtext}>
                         {t('profile.subscription.upgradeButton')} 🚀
                       </Text>
@@ -480,7 +469,7 @@ export default function AddMealModal({
             {/* Meal Type Selector */}
             <Text style={styles.sectionLabel}>{t('diary.addMealModal.mealType')}</Text>
             <View style={styles.mealTypeContainer}>
-              {MEAL_TYPES.map((item) => (
+              {MEAL_TYPES.map(item => (
                 <TouchableOpacity
                   key={item.type}
                   style={[
@@ -526,7 +515,9 @@ export default function AddMealModal({
             />
 
             {/* Macros Row */}
-            <Text style={styles.sectionLabel}>{t('diary.protein')} / {t('diary.fat')} / {t('diary.carbs')}</Text>
+            <Text style={styles.sectionLabel}>
+              {t('diary.protein')} / {t('diary.fat')} / {t('diary.carbs')}
+            </Text>
             <View style={styles.macrosRow}>
               <View style={styles.macroInput}>
                 <Input
@@ -578,10 +569,7 @@ export default function AddMealModal({
               <View style={styles.photoPreviewContainer}>
                 <Text style={styles.sectionLabel}>{t('diary.addMealModal.photoButton')}</Text>
                 <View style={styles.photoPreview}>
-                  <Image
-                    source={{ uri: photoResult.photoUri }}
-                    style={styles.photoImage}
-                  />
+                  <Image source={{ uri: photoResult.photoUri }} style={styles.photoImage} />
                   <TouchableOpacity
                     style={styles.photoRemoveButton}
                     onPress={() => setPhotoResult(null)}

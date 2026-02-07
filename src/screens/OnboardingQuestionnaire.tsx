@@ -6,18 +6,34 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
-import { calculateUserCalories, getActivityLevelLabel, getGoalTypeLabel } from '../utils/calorieCalculator';
-import type { Gender, ActivityLevel, GoalType, User } from '../types';
-import authService from '../services/authService';
 import analyticsService from '../services/analyticsService';
+import authService from '../services/authService';
+import {
+  calculateUserCalories,
+  getActivityLevelLabel,
+  getGoalTypeLabel,
+} from '../utils/calorieCalculator';
+
+import type { Gender, ActivityLevel, GoalType, User } from '../types';
 
 interface OnboardingQuestionnaireProps {
   user: User;
@@ -26,7 +42,10 @@ interface OnboardingQuestionnaireProps {
 
 type Step = 'gender_age' | 'height_weight' | 'goal' | 'activity' | 'target_weight' | 'summary';
 
-export default function OnboardingQuestionnaire({ user, onComplete }: OnboardingQuestionnaireProps) {
+export default function OnboardingQuestionnaire({
+  user,
+  onComplete,
+}: OnboardingQuestionnaireProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<Step>('gender_age');
@@ -199,7 +218,9 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         >
           <Text style={styles.genderEmoji}>👨</Text>
           <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
-          {gender === 'male' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+          {gender === 'male' && (
+            <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -212,13 +233,18 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         >
           <Text style={styles.genderEmoji}>👩</Text>
           <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
-          {gender === 'female' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+          {gender === 'female' && (
+            <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+          )}
         </TouchableOpacity>
       </View>
 
       <Text style={[styles.label, { color: theme.text }]}>{t('profile.user')}</Text>
       <TextInput
-        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        style={[
+          styles.input,
+          { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border },
+        ]}
         placeholder={t('diary.addMealModal.enterMealName')}
         placeholderTextColor={theme.disabled}
         keyboardType="number-pad"
@@ -231,14 +257,21 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
 
   const renderHeightWeightStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>
+        {t('profile.goalSettings.targetWeight')}
+      </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
         {t('profile.editModals.currentWeight', { weight: 0 })}
       </Text>
 
-      <Text style={[styles.label, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.label, { color: theme.text }]}>
+        {t('profile.goalSettings.targetWeight')}
+      </Text>
       <TextInput
-        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        style={[
+          styles.input,
+          { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border },
+        ]}
         placeholder="175"
         placeholderTextColor={theme.disabled}
         keyboardType="number-pad"
@@ -247,9 +280,14 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         maxLength={3}
       />
 
-      <Text style={[styles.label, { color: theme.text }]}>{t('profile.editModals.currentWeight', { weight: '' })}</Text>
+      <Text style={[styles.label, { color: theme.text }]}>
+        {t('profile.editModals.currentWeight', { weight: '' })}
+      </Text>
       <TextInput
-        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        style={[
+          styles.input,
+          { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border },
+        ]}
         placeholder="70.5"
         placeholderTextColor={theme.disabled}
         keyboardType="decimal-pad"
@@ -262,7 +300,9 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
 
   const renderGoalStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.goal')}</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>
+        {t('profile.goalSettings.goal')}
+      </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
         {t('profile.editModals.selectGoal')}
       </Text>
@@ -278,11 +318,17 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         <View style={styles.goalLeft}>
           <Text style={styles.goalEmoji}>📉</Text>
           <View>
-            <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.lose_weight')}</Text>
-            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.lose_weight')}</Text>
+            <Text style={[styles.goalTitle, { color: theme.text }]}>
+              {t('goalTypes.lose_weight')}
+            </Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
+              {t('goalTypes.lose_weight')}
+            </Text>
           </View>
         </View>
-        {goalType === 'lose_weight' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        {goalType === 'lose_weight' && (
+          <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -297,10 +343,14 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
           <Text style={styles.goalEmoji}>➡️</Text>
           <View>
             <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.maintain')}</Text>
-            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.maintain')}</Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
+              {t('goalTypes.maintain')}
+            </Text>
           </View>
         </View>
-        {goalType === 'maintain' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        {goalType === 'maintain' && (
+          <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -314,57 +364,86 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         <View style={styles.goalLeft}>
           <Text style={styles.goalEmoji}>📈</Text>
           <View>
-            <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.gain_weight')}</Text>
-            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.gain_weight')}</Text>
+            <Text style={[styles.goalTitle, { color: theme.text }]}>
+              {t('goalTypes.gain_weight')}
+            </Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
+              {t('goalTypes.gain_weight')}
+            </Text>
           </View>
         </View>
-        {goalType === 'gain_weight' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        {goalType === 'gain_weight' && (
+          <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+        )}
       </TouchableOpacity>
     </View>
   );
 
   const renderActivityStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.goal')}</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>
+        {t('profile.goalSettings.goal')}
+      </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
         {t('profile.editModals.selectGoal')}
       </Text>
 
-      {(['sedentary', 'light', 'moderate', 'active', 'very_active'] as ActivityLevel[]).map((level) => (
-        <TouchableOpacity
-          key={level}
-          style={[
-            styles.activityOption,
-            { backgroundColor: theme.surface, borderColor: theme.border },
-            activityLevel === level && { borderColor: theme.primary, borderWidth: 2 },
-          ]}
-          onPress={() => setActivityLevel(level)}
-        >
-          <View style={styles.activityLeft}>
-            <Text style={[styles.activityTitle, { color: theme.text }]}>{getActivityLevelLabel(level)}</Text>
-          </View>
-          {activityLevel === level && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
-        </TouchableOpacity>
-      ))}
+      {(['sedentary', 'light', 'moderate', 'active', 'very_active'] as ActivityLevel[]).map(
+        level => (
+          <TouchableOpacity
+            key={level}
+            style={[
+              styles.activityOption,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+              activityLevel === level && { borderColor: theme.primary, borderWidth: 2 },
+            ]}
+            onPress={() => setActivityLevel(level)}
+          >
+            <View style={styles.activityLeft}>
+              <Text style={[styles.activityTitle, { color: theme.text }]}>
+                {getActivityLevelLabel(level)}
+              </Text>
+            </View>
+            {activityLevel === level && (
+              <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+            )}
+          </TouchableOpacity>
+        )
+      )}
     </View>
   );
 
   const renderTargetWeightStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>
+        {t('profile.goalSettings.targetWeight')}
+      </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
         {t('profile.editModals.editTargetWeight')}
       </Text>
 
       <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
-        <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.editModals.currentWeight', { weight: '' })}</Text>
-        <Text style={[styles.summaryValue, { color: theme.text }]}>{weight} {t('diary.calories')}</Text>
+        <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+          {t('profile.editModals.currentWeight', { weight: '' })}
+        </Text>
+        <Text style={[styles.summaryValue, { color: theme.text }]}>
+          {weight} {t('diary.calories')}
+        </Text>
       </View>
 
-      <Text style={[styles.label, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.label, { color: theme.text }]}>
+        {t('profile.goalSettings.targetWeight')}
+      </Text>
       <TextInput
-        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-        placeholder={goalType === 'lose_weight' ? t('profile.editModals.targetWeightLowerForLoss') : t('profile.editModals.targetWeightHigherForGain')}
+        style={[
+          styles.input,
+          { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border },
+        ]}
+        placeholder={
+          goalType === 'lose_weight'
+            ? t('profile.editModals.targetWeightLowerForLoss')
+            : t('profile.editModals.targetWeightHigherForGain')
+        }
         placeholderTextColor={theme.disabled}
         keyboardType="decimal-pad"
         value={targetWeight}
@@ -399,24 +478,34 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
         </Card>
 
         <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.goalSettings.goal')}</Text>
-          <Text style={[styles.summaryValue, { color: theme.text }]}>{getGoalTypeLabel(goalType)}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+            {t('profile.goalSettings.goal')}
+          </Text>
+          <Text style={[styles.summaryValue, { color: theme.text }]}>
+            {getGoalTypeLabel(goalType)}
+          </Text>
         </View>
 
         <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.goalSettings.targetWeight')}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+            {t('profile.goalSettings.targetWeight')}
+          </Text>
           <Text style={[styles.summaryValue, { color: theme.text }]}>
             {weight} → {targetWeight}
           </Text>
         </View>
 
         <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('diary.calories')}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+            {t('diary.calories')}
+          </Text>
           <Text style={[styles.summaryValue, { color: theme.text }]}>{bmr}</Text>
         </View>
 
         <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('diary.goal')}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+            {t('diary.goal')}
+          </Text>
           <Text style={[styles.summaryValue, { color: theme.text }]}>{tdee}</Text>
         </View>
       </View>
@@ -438,7 +527,12 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
 
       <View style={styles.footer}>
         {currentStep !== 'gender_age' && (
-          <Button title={t('common.cancel')} variant="secondary" onPress={handleBack} style={styles.backButton} />
+          <Button
+            title={t('common.cancel')}
+            variant="secondary"
+            onPress={handleBack}
+            style={styles.backButton}
+          />
         )}
         {currentStep !== 'summary' ? (
           <Button title={t('onboarding.next')} onPress={handleNext} style={styles.nextButton} />
@@ -457,126 +551,138 @@ export default function OnboardingQuestionnaire({ user, onComplete }: Onboarding
 }
 
 const styles = StyleSheet.create({
-  container: {
+  activityLeft: {
     flex: 1,
   },
-  progressContainer: {
+  activityOption: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
     padding: Spacing.md,
-    paddingBottom: Spacing.sm,
   },
-  progressBar: {
-    height: 4,
-    borderRadius: 2,
-    marginBottom: Spacing.xs,
+  activityTitle: {
+    ...Typography.body,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
+  backButton: {
+    flex: 1,
   },
-  progressText: {
-    ...Typography.caption,
-    textAlign: 'center',
+  calorieCard: {
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    padding: Spacing.xl,
+  },
+  calorieLabel: {
+    ...Typography.bodyLarge,
+  },
+  calorieValue: {
+    ...Typography.h1,
+    fontSize: 48,
+  },
+  container: {
+    flex: 1,
   },
   content: {
     flex: 1,
     padding: Spacing.md,
   },
-  stepContainer: {
-    paddingBottom: Spacing.xl,
-  },
-  stepTitle: {
-    ...Typography.h2,
-    marginBottom: Spacing.xs,
-  },
-  stepDescription: {
-    ...Typography.body,
-    marginBottom: Spacing.lg,
-  },
-  label: {
-    ...Typography.bodyLarge,
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.md,
-  },
-  input: {
-    ...Typography.bodyLarge,
+  footer: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
     padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
+    paddingBottom: Spacing.xl,
   },
   genderContainer: {
     marginBottom: Spacing.md,
-  },
-  genderOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
-    marginBottom: Spacing.sm,
   },
   genderEmoji: {
     fontSize: 32,
     marginRight: Spacing.md,
   },
-  genderText: {
-    ...Typography.bodyLarge,
-    flex: 1,
-  },
-  goalOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  genderOption: {
     alignItems: 'center',
-    padding: Spacing.md,
     borderRadius: BorderRadius.medium,
     borderWidth: 1,
-    marginBottom: Spacing.sm,
-  },
-  goalLeft: {
     flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
+  },
+  genderText: {
+    ...Typography.bodyLarge,
     flex: 1,
   },
   goalEmoji: {
     fontSize: 32,
     marginRight: Spacing.md,
   },
-  goalTitle: {
-    ...Typography.bodyLarge,
+  goalLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+  },
+  goalOption: {
+    alignItems: 'center',
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   goalSubtitle: {
     ...Typography.caption,
   },
-  activityOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
-    marginBottom: Spacing.sm,
-  },
-  activityLeft: {
-    flex: 1,
-  },
-  activityTitle: {
-    ...Typography.body,
-  },
-  calorieCard: {
-    alignItems: 'center',
-    padding: Spacing.xl,
-    marginBottom: Spacing.md,
-  },
-  calorieValue: {
-    ...Typography.h1,
-    fontSize: 48,
-  },
-  calorieLabel: {
+  goalTitle: {
     ...Typography.bodyLarge,
   },
-  summaryCard: {
+  input: {
+    ...Typography.bodyLarge,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
     padding: Spacing.md,
+  },
+  label: {
+    ...Typography.bodyLarge,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  nextButton: {
+    flex: 2,
+  },
+  progressBar: {
+    borderRadius: 2,
+    height: 4,
+    marginBottom: Spacing.xs,
+  },
+  progressContainer: {
+    padding: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  progressFill: {
+    borderRadius: 2,
+    height: '100%',
+  },
+  progressText: {
+    ...Typography.caption,
+    textAlign: 'center',
+  },
+  stepContainer: {
+    paddingBottom: Spacing.xl,
+  },
+  stepDescription: {
+    ...Typography.body,
+    marginBottom: Spacing.lg,
+  },
+  stepTitle: {
+    ...Typography.h2,
+    marginBottom: Spacing.xs,
+  },
+  summaryCard: {
     borderRadius: BorderRadius.medium,
     marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   summaryLabel: {
     ...Typography.caption,
@@ -584,17 +690,5 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     ...Typography.bodyLarge,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: Spacing.md,
-    paddingBottom: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  backButton: {
-    flex: 1,
-  },
-  nextButton: {
-    flex: 2,
   },
 });

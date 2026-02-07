@@ -1,13 +1,16 @@
 // MealCard Component - карточка приёма пищи согласно DESIGN.md
 
 import React from 'react';
+
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import Card from './Card';
+import { MEAL_TYPE_LABELS } from '../config/constants';
 import { Typography, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
-import { FoodEntry, MealType } from '../types';
-import { MEAL_TYPE_LABELS } from '../config/constants';
+import { FoodEntry } from '../types';
 
 interface MealCardProps {
   meal: FoodEntry;
@@ -29,45 +32,45 @@ export default function MealCard({ meal, onPress, onEdit, onDelete }: MealCardPr
       marginVertical: Spacing.sm,
     },
     header: {
+      alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: Spacing.sm,
-    },
-    mealType: {
-      fontSize: Typography.body.fontSize,
-      fontWeight: '600',
-      color: theme.text,
-    },
-    menuButton: {
-      padding: Spacing.xs,
-    },
-    name: {
-      fontSize: Typography.bodyLarge.fontSize,
-      fontWeight: '400',
-      color: theme.text,
-      marginBottom: Spacing.md,
-    },
-    macrosContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
       marginBottom: Spacing.sm,
     },
     macroItem: {
       marginRight: Spacing.md,
     },
+    macroLabel: {
+      color: theme.textSecondary,
+      fontSize: Typography.caption.fontSize,
+    },
     macroValue: {
+      color: theme.text,
       fontSize: Typography.body.fontSize,
       fontWeight: '600',
-      color: theme.text,
     },
-    macroLabel: {
-      fontSize: Typography.caption.fontSize,
-      color: theme.textSecondary,
+    macrosContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      marginBottom: Spacing.sm,
+    },
+    mealType: {
+      color: theme.text,
+      fontSize: Typography.body.fontSize,
+      fontWeight: '600',
+    },
+    menuButton: {
+      padding: Spacing.xs,
+    },
+    name: {
+      color: theme.text,
+      fontSize: Typography.bodyLarge.fontSize,
+      fontWeight: '400',
+      marginBottom: Spacing.md,
     },
     time: {
-      fontSize: Typography.caption.fontSize,
       color: theme.disabled,
+      fontSize: Typography.caption.fontSize,
     },
   });
 

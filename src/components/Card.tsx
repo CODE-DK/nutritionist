@@ -1,7 +1,9 @@
 // Card Component - базовая карточка согласно DESIGN.md
 
 import React from 'react';
+
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+
 import { BorderRadius, Shadows, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -18,12 +20,12 @@ export default function Card({ children, style, elevation = 2 }: CardProps) {
     elevation === 0
       ? Shadows.level0
       : elevation === 1
-      ? Shadows.level1
-      : elevation === 2
-      ? Shadows.level2
-      : elevation === 3
-      ? Shadows.level3
-      : Shadows.level4;
+        ? Shadows.level1
+        : elevation === 2
+          ? Shadows.level2
+          : elevation === 3
+            ? Shadows.level3
+            : Shadows.level4;
 
   const cardStyle = {
     ...styles.card,

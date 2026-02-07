@@ -6,8 +6,8 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.20.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -64,7 +64,7 @@ interface FoodAnalysisResponse {
   reasoning: string;
 }
 
-serve(async (req) => {
+serve(async req => {
   // CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -123,7 +123,8 @@ serve(async (req) => {
     if (!canProceed) {
       return new Response(
         JSON.stringify({
-          error: 'Вы использовали все фото на сегодня. Перейдите на Premium для безлимитного доступа!',
+          error:
+            'Вы использовали все фото на сегодня. Перейдите на Premium для безлимитного доступа!',
           code: 'PHOTO_LIMIT_EXCEEDED',
         }),
         {
@@ -225,13 +226,10 @@ serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: statusCode,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: statusCode,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
 
@@ -248,9 +246,7 @@ async function checkPhotoLimit(supabase: any, userId: string): Promise<boolean> 
     .eq('id', userId)
     .single();
 
-  const limit = userData?.subscription_tier === 'premium'
-    ? PREMIUM_PHOTO_LIMIT
-    : FREE_PHOTO_LIMIT;
+  const limit = userData?.subscription_tier === 'premium' ? PREMIUM_PHOTO_LIMIT : FREE_PHOTO_LIMIT;
 
   // Получаем текущее использование
   const { data: usageData } = await supabase

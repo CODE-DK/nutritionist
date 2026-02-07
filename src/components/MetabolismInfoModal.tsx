@@ -4,16 +4,11 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
+
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 
@@ -24,7 +19,6 @@ interface MetabolismInfoModalProps {
 
 export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfoModalProps) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
 
   const sections = [
     {
@@ -57,8 +51,7 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
       emoji: '🎯',
       title: 'Целевая норма калорий',
       subtitle: 'Ваша персональная норма',
-      description:
-        'Количество калорий, которое нужно потреблять для достижения вашей цели.',
+      description: 'Количество калорий, которое нужно потреблять для достижения вашей цели.',
       points: [
         'Похудение: TDEE - 20% (дефицит)',
         'Поддержание веса: TDEE',
@@ -70,8 +63,7 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
       emoji: '📊',
       title: 'Дефицит калорий',
       subtitle: 'Как это работает',
-      description:
-        'Разница между вашим расходом энергии и потреблением калорий.',
+      description: 'Разница между вашим расходом энергии и потреблением калорий.',
       points: [
         '7700 ккал дефицита = 1 кг потери веса',
         'Безопасная потеря: 0.5-1 кг в неделю',
@@ -87,9 +79,7 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
         <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
           {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>
-              Как работает метаболизм
-            </Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Как работает метаболизм</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color={theme.text} />
             </TouchableOpacity>
@@ -97,10 +87,7 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
 
           <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
             {sections.map((section, index) => (
-              <View
-                key={index}
-                style={[styles.section, { backgroundColor: theme.background }]}
-              >
+              <View key={index} style={[styles.section, { backgroundColor: theme.background }]}>
                 <View style={styles.sectionHeader}>
                   <Text style={styles.emoji}>{section.emoji}</Text>
                   <View style={styles.sectionTitleContainer}>
@@ -134,14 +121,16 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
             <View style={[styles.infoBox, { backgroundColor: theme.primaryLight }]}>
               <Ionicons name="information-circle" size={24} color={theme.primary} />
               <Text style={[styles.infoText, { color: theme.text }]}>
-                Все расчеты основаны на формуле Mifflin-St Jeor - одной из самых точных формул для определения базового метаболизма.
+                Все расчеты основаны на формуле Mifflin-St Jeor - одной из самых точных формул для
+                определения базового метаболизма.
               </Text>
             </View>
 
             <View style={[styles.warningBox, { backgroundColor: 'rgba(255, 152, 0, 0.1)' }]}>
               <Ionicons name="warning" size={24} color="#FF9800" />
               <Text style={[styles.warningText, { color: theme.text }]}>
-                При наличии медицинских показаний обязательно проконсультируйтесь с врачом перед изменением питания.
+                При наличии медицинских показаний обязательно проконсультируйтесь с врачом перед
+                изменением питания.
               </Text>
             </View>
           </ScrollView>
@@ -152,96 +141,96 @@ export default function MetabolismInfoModal({ visible, onClose }: MetabolismInfo
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  bullet: {
+    borderRadius: 3,
+    height: 6,
+    marginRight: Spacing.sm,
+    marginTop: 7,
+    width: 6,
   },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.large,
-    borderTopRightRadius: BorderRadius.large,
-    padding: Spacing.lg,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  modalTitle: {
-    ...Typography.h2,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  section: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.medium,
-    marginBottom: Spacing.md,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  description: {
+    ...Typography.body,
+    lineHeight: 22,
     marginBottom: Spacing.md,
   },
   emoji: {
     fontSize: 32,
     marginRight: Spacing.md,
   },
-  sectionTitleContainer: {
-    flex: 1,
-  },
-  sectionTitle: {
-    ...Typography.h3,
-  },
-  sectionSubtitle: {
-    ...Typography.caption,
-    marginTop: 2,
-  },
-  description: {
-    ...Typography.body,
-    marginBottom: Spacing.md,
-    lineHeight: 22,
-  },
-  pointsContainer: {
-    gap: Spacing.sm,
-  },
-  pointRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginTop: 7,
-    marginRight: Spacing.sm,
-  },
-  pointText: {
-    ...Typography.body,
-    flex: 1,
-  },
   infoBox: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
-    padding: Spacing.md,
     borderRadius: BorderRadius.medium,
-    marginBottom: Spacing.md,
+    flexDirection: 'row',
     gap: Spacing.md,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
   },
   infoText: {
     ...Typography.body,
     flex: 1,
     lineHeight: 20,
   },
-  warningBox: {
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.large,
+    borderTopRightRadius: BorderRadius.large,
+    maxHeight: '90%',
+    padding: Spacing.lg,
+  },
+  modalHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.lg,
+  },
+  modalOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalTitle: {
+    ...Typography.h2,
+  },
+  pointRow: {
     alignItems: 'flex-start',
-    padding: Spacing.md,
+    flexDirection: 'row',
+  },
+  pointText: {
+    ...Typography.body,
+    flex: 1,
+  },
+  pointsContainer: {
+    gap: Spacing.sm,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  section: {
     borderRadius: BorderRadius.medium,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+  },
+  sectionSubtitle: {
+    ...Typography.caption,
+    marginTop: 2,
+  },
+  sectionTitle: {
+    ...Typography.h3,
+  },
+  sectionTitleContainer: {
+    flex: 1,
+  },
+  warningBox: {
+    alignItems: 'flex-start',
+    borderRadius: BorderRadius.medium,
+    flexDirection: 'row',
     gap: Spacing.md,
+    marginBottom: Spacing.xl,
+    padding: Spacing.md,
   },
   warningText: {
     ...Typography.body,

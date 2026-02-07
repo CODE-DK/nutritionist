@@ -1,10 +1,12 @@
 // photoService - сервис для работы с фото-распознаванием еды
 
-import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import { supabase } from '../config/supabase';
+import * as ImagePicker from 'expo-image-picker';
+
 import { APP_CONFIG, PHOTO_CONFIG } from '../config/constants';
+import { supabase } from '../config/supabase';
+
 import type { PhotoAnalysisResult, PhotoUsage, ApiError } from '../types';
 
 class PhotoService {
@@ -219,20 +221,16 @@ class PhotoService {
       const blob = await response.blob();
 
       // Upload в Storage
-      const { data, error } = await supabase.storage
-        .from('food-photos')
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg',
-          cacheControl: '3600',
-          upsert: false,
-        });
+      const { error } = await supabase.storage.from('food-photos').upload(fileName, blob, {
+        contentType: 'image/jpeg',
+        cacheControl: '3600',
+        upsert: false,
+      });
 
       if (error) throw error;
 
       // Получаем публичный URL
-      const { data: urlData } = supabase.storage
-        .from('food-photos')
-        .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('food-photos').getPublicUrl(fileName);
 
       return urlData.publicUrl;
     } catch (error: any) {
@@ -299,7 +297,10 @@ class PhotoService {
   /**
    * 11. Удалить старые фото (cleanup для Free tier)
    */
-  async cleanupOldPhotos(userId: string, daysToKeep: number = APP_CONFIG.PHOTO_CLEANUP_DAYS): Promise<void> {
+  async cleanupOldPhotos(
+    userId: string,
+    daysToKeep: number = APP_CONFIG.PHOTO_CLEANUP_DAYS
+  ): Promise<void> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);

@@ -1,9 +1,12 @@
 // ChatBubble Component - сообщение в чате согласно DESIGN.md
 
 import React from 'react';
+
 import { View, Text, StyleSheet } from 'react-native';
+
 import { Typography, BorderRadius, Spacing, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
+
 import type { ChatMessage } from '../types';
 
 interface ChatBubbleProps {
@@ -15,79 +18,73 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.role === 'user';
 
   const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      marginVertical: Spacing.sm,
-      paddingHorizontal: Spacing.md,
+    aiBubble: {
+      backgroundColor: theme.primaryLight,
+      borderBottomLeftRadius: 4,
+      borderRadius: BorderRadius.large,
     },
-    userContainer: {
-      justifyContent: 'flex-end',
+    aiText: {
+      color: theme.text,
     },
     avatarPlaceholder: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: theme.background,
-      justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: theme.background,
+      borderRadius: 16,
+      height: 32,
+      justifyContent: 'center',
       marginHorizontal: Spacing.sm,
+      width: 32,
     },
     avatarText: {
       fontSize: 18,
-    },
-    bubbleWrapper: {
-      maxWidth: '75%',
-    },
-    userBubbleWrapper: {
-      alignItems: 'flex-end',
     },
     bubble: {
       paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.sm + Spacing.xs,
       ...Shadows.level1,
     },
-    aiBubble: {
-      backgroundColor: theme.primaryLight,
-      borderRadius: BorderRadius.large,
-      borderBottomLeftRadius: 4,
+    bubbleWrapper: {
+      maxWidth: '75%',
     },
-    userBubble: {
-      backgroundColor: theme.secondary,
-      borderRadius: BorderRadius.large,
-      borderBottomRightRadius: 4,
+    container: {
+      flexDirection: 'row',
+      marginVertical: Spacing.sm,
+      paddingHorizontal: Spacing.md,
     },
     text: {
       fontSize: Typography.bodyLarge.fontSize,
       lineHeight: Typography.bodyLarge.lineHeight,
     },
-    aiText: {
-      color: theme.text,
+    time: {
+      color: theme.disabled,
+      fontSize: Typography.caption.fontSize,
+      marginLeft: Spacing.xs,
+      marginTop: Spacing.xs,
+    },
+    userBubble: {
+      backgroundColor: theme.secondary,
+      borderBottomRightRadius: 4,
+      borderRadius: BorderRadius.large,
+    },
+    userBubbleWrapper: {
+      alignItems: 'flex-end',
+    },
+    userContainer: {
+      justifyContent: 'flex-end',
     },
     userText: {
       color: theme.white,
     },
-    time: {
-      fontSize: Typography.caption.fontSize,
-      color: theme.disabled,
-      marginTop: Spacing.xs,
-      marginLeft: Spacing.xs,
-    },
     userTime: {
-      textAlign: 'right',
       marginLeft: 0,
       marginRight: Spacing.xs,
+      textAlign: 'right',
     },
   });
 
-  const bubbleStyle = [
-    styles.bubble,
-    isUser ? styles.userBubble : styles.aiBubble,
-  ];
+  const bubbleStyle = [styles.bubble, isUser ? styles.userBubble : styles.aiBubble];
 
-  const textStyle = [
-    styles.text,
-    isUser ? styles.userText : styles.aiText,
-  ];
+  const textStyle = [styles.text, isUser ? styles.userText : styles.aiText];
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);

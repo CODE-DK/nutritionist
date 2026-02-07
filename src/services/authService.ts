@@ -6,8 +6,8 @@
  */
 
 import { supabase } from '../config/supabase';
+
 import type { User, AuthResponse, ApiError } from '../types';
-import { SUBSCRIPTION_TYPES } from '../config/constants';
 
 class AuthService {
   /**
@@ -97,14 +97,22 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User | null> {
     try {
-      const { data: { user: authUser }, error } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+        error,
+      } = await supabase.auth.getUser();
 
       if (error) throw error;
       if (!authUser) return null;
 
       const user = await this.getUserProfile(authUser.id, authUser.email || '');
       return user;
-    } catch (error) {
+    } catch (error: any) {
+      // AuthSessionMissingError - это нормально, когда пользователь не авторизован
+      if (error?.message?.includes('Auth session missing')) {
+        return null;
+      }
+      // Логируем только реальные ошибки
       console.error('Error getting current user:', error);
       return null;
     }
@@ -155,15 +163,14 @@ class AuthService {
         dbUpdates.target_calories = updates.dailyCalorieGoal;
       }
 
-      const { error } = await supabase
-        .from('users')
-        .update(dbUpdates)
-        .eq('id', userId);
+      const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
 
       if (error) throw error;
 
       // Получаем email из auth
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
       const email = authUser?.email || '';
 
       // Возвращаем обновленный профиль
@@ -177,7 +184,9 @@ class AuthService {
    * Проверка авторизации
    */
   async isAuthenticated(): Promise<boolean> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session !== null;
   }
 
@@ -221,10 +230,7 @@ class AuthService {
   onAuthStateChange(callback: (user: User | null) => void) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        const user = await this.getUserProfile(
-          session.user.id,
-          session.user.email || ''
-        );
+        const user = await this.getUserProfile(session.user.id, session.user.email || '');
         callback(user);
       } else {
         callback(null);
@@ -238,11 +244,7 @@ class AuthService {
    * Получить полный профиль пользователя из БД
    */
   private async getUserProfile(userId: string, email: string): Promise<User> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
 
     if (error) throw error;
 

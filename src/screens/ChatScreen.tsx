@@ -1,6 +1,7 @@
 // ChatScreen - экран чата с AI диетологом
 
 import React, { useState, useRef, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -12,17 +13,19 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import ChatBubble from '../components/ChatBubble';
-import Loading from '../components/Loading';
+import { APP_CONFIG } from '../config/constants';
 import { Typography, Spacing, BorderRadius } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
 import aiService from '../services/aiService';
 import analyticsService from '../services/analyticsService';
+
 import type { ChatMessage } from '../types';
-import { APP_CONFIG } from '../config/constants';
 
 interface ChatScreenProps {
   userId: string;
@@ -41,7 +44,13 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
   useEffect(() => {
     // Добавляем приветственное сообщение при первой загрузке
     if (messages.length === 0) {
-      addAIMessage(t('onboarding.title') + ' 👋\n\n' + t('onboarding.subtitle') + '\n\n' + t('chat.placeholder'));
+      addAIMessage(
+        t('onboarding.title') +
+          ' 👋\n\n' +
+          t('onboarding.subtitle') +
+          '\n\n' +
+          t('chat.placeholder')
+      );
     }
   }, [t]);
 
@@ -52,7 +61,7 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
       content,
       timestamp: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, message]);
+    setMessages(prev => [...prev, message]);
   };
 
   const addUserMessage = (content: string) => {
@@ -62,7 +71,7 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
       content,
       timestamp: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, message]);
+    setMessages(prev => [...prev, message]);
   };
 
   const handleSend = async () => {
@@ -138,125 +147,125 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.background,
-    },
-    keyboardView: {
       flex: 1,
+    },
+    dot: {
+      backgroundColor: theme.primary,
+      borderRadius: 2,
+      height: 4,
+      marginHorizontal: 2,
+      width: 4,
+    },
+    dots: {
+      flexDirection: 'row',
     },
     header: {
+      alignItems: 'center',
+      backgroundColor: theme.white,
+      borderBottomColor: theme.border,
+      borderBottomWidth: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
       paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.md,
-      backgroundColor: theme.white,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
     },
     headerTitle: {
       ...Typography.h3,
     },
-    usageBadge: {
-      backgroundColor: theme.primaryLight,
-      paddingHorizontal: Spacing.sm + Spacing.xs,
+    input: {
+      color: theme.text,
+      flex: 1,
+      fontSize: Typography.bodyLarge.fontSize,
+      maxHeight: 100,
+      paddingVertical: Spacing.sm,
+    },
+    inputContainer: {
+      backgroundColor: theme.white,
+      borderTopColor: theme.border,
+      borderTopWidth: 1,
+      padding: Spacing.md,
+    },
+    inputWrapper: {
+      alignItems: 'flex-end',
+      backgroundColor: theme.white,
+      borderColor: theme.border,
+      borderRadius: 24,
+      borderWidth: 1,
+      flexDirection: 'row',
+      paddingLeft: Spacing.md,
+      paddingRight: Spacing.xs,
       paddingVertical: Spacing.xs,
-      borderRadius: BorderRadius.pill,
     },
-    usageBadgeWarning: {
-      backgroundColor: theme.warningLight,
+    keyboardView: {
+      flex: 1,
     },
-    usageBadgeError: {
-      backgroundColor: theme.errorLight,
-    },
-    usageText: {
+    limitText: {
       ...Typography.caption,
-      fontWeight: '600',
-      color: theme.primary,
+      color: theme.textSecondary,
+      marginTop: Spacing.xs,
+      textAlign: 'center',
     },
-    usageTextWarning: {
+    limitTextError: {
+      ...Typography.caption,
       color: theme.error,
+      fontWeight: '600',
+      marginTop: Spacing.xs,
+      textAlign: 'center',
     },
-    messagesList: {
-      paddingVertical: Spacing.md,
+    limitTextWarning: {
+      color: theme.warning,
     },
     loadingContainer: {
       padding: Spacing.md,
     },
-    typingIndicator: {
-      flexDirection: 'row',
+    messagesList: {
+      paddingVertical: Spacing.md,
+    },
+    sendButton: {
       alignItems: 'center',
       backgroundColor: theme.primaryLight,
+      borderRadius: 18,
+      height: 36,
+      justifyContent: 'center',
+      width: 36,
+    },
+    sendButtonDisabled: {
+      backgroundColor: theme.background,
+    },
+    typingIndicator: {
+      alignItems: 'center',
       alignSelf: 'flex-start',
+      backgroundColor: theme.primaryLight,
+      borderRadius: BorderRadius.large,
+      flexDirection: 'row',
       paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.sm,
-      borderRadius: BorderRadius.large,
     },
     typingText: {
       ...Typography.body,
       color: theme.textSecondary,
       marginRight: Spacing.sm,
     },
-    dots: {
-      flexDirection: 'row',
-    },
-    dot: {
-      width: 4,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: theme.primary,
-      marginHorizontal: 2,
-    },
-    inputContainer: {
-      padding: Spacing.md,
-      backgroundColor: theme.white,
-      borderTopWidth: 1,
-      borderTopColor: theme.border,
-    },
-    inputWrapper: {
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.border,
-      borderRadius: 24,
-      paddingLeft: Spacing.md,
-      paddingRight: Spacing.xs,
+    usageBadge: {
+      backgroundColor: theme.primaryLight,
+      borderRadius: BorderRadius.pill,
+      paddingHorizontal: Spacing.sm + Spacing.xs,
       paddingVertical: Spacing.xs,
     },
-    input: {
-      flex: 1,
-      fontSize: Typography.bodyLarge.fontSize,
-      color: theme.text,
-      maxHeight: 100,
-      paddingVertical: Spacing.sm,
+    usageBadgeError: {
+      backgroundColor: theme.errorLight,
     },
-    sendButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: theme.primaryLight,
+    usageBadgeWarning: {
+      backgroundColor: theme.warningLight,
     },
-    sendButtonDisabled: {
-      backgroundColor: theme.background,
-    },
-    limitText: {
+    usageText: {
       ...Typography.caption,
-      color: theme.textSecondary,
-      textAlign: 'center',
-      marginTop: Spacing.xs,
-    },
-    limitTextWarning: {
-      color: theme.warning,
-    },
-    limitTextError: {
-      ...Typography.caption,
-      color: theme.error,
-      textAlign: 'center',
-      marginTop: Spacing.xs,
+      color: theme.primary,
       fontWeight: '600',
+    },
+    usageTextWarning: {
+      color: theme.error,
     },
   });
 
@@ -270,15 +279,19 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t('chat.title')}</Text>
-          <View style={[
-            styles.usageBadge,
-            isWarningLimit && styles.usageBadgeWarning,
-            isLimitReached && styles.usageBadgeError
-          ]}>
-            <Text style={[
-              styles.usageText,
-              (isWarningLimit || isLimitReached) && styles.usageTextWarning
-            ]}>
+          <View
+            style={[
+              styles.usageBadge,
+              isWarningLimit && styles.usageBadgeWarning,
+              isLimitReached && styles.usageBadgeError,
+            ]}
+          >
+            <Text
+              style={[
+                styles.usageText,
+                (isWarningLimit || isLimitReached) && styles.usageTextWarning,
+              ]}
+            >
               {usage.remaining}/{usage.limit}
             </Text>
           </View>
@@ -288,7 +301,7 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={({ item }) => <ChatBubble message={item} />}
           contentContainerStyle={styles.messagesList}
           showsVerticalScrollIndicator={false}
@@ -323,14 +336,19 @@ export default function ChatScreen({ userId, onLimitReached }: ChatScreenProps) 
               editable={!loading && !isLimitReached}
             />
             <TouchableOpacity
-              style={[styles.sendButton, (!inputText.trim() || loading || isLimitReached) && styles.sendButtonDisabled]}
+              style={[
+                styles.sendButton,
+                (!inputText.trim() || loading || isLimitReached) && styles.sendButtonDisabled,
+              ]}
               onPress={handleSend}
               disabled={!inputText.trim() || loading || isLimitReached}
             >
               <Ionicons
                 name="send"
                 size={20}
-                color={inputText.trim() && !loading && !isLimitReached ? theme.primary : theme.disabled}
+                color={
+                  inputText.trim() && !loading && !isLimitReached ? theme.primary : theme.disabled
+                }
               />
             </TouchableOpacity>
           </View>

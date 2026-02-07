@@ -1,13 +1,16 @@
 // OnboardingScreen - первый экран при запуске приложения
 
 import React from 'react';
+
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Button from '../components/Button';
+import { ONBOARDING_EXAMPLES, APP_CONFIG } from '../config/constants';
 import { Typography, Spacing } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
-import { ONBOARDING_EXAMPLES, APP_CONFIG } from '../config/constants';
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -20,47 +23,31 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.white,
-    },
-    header: {
-      alignItems: 'flex-end',
-      marginBottom: Spacing.lg,
+      flex: 1,
     },
     content: {
-      padding: Spacing.lg,
       alignItems: 'center',
+      padding: Spacing.lg,
+    },
+    description: {
+      ...Typography.bodyLarge,
+      color: theme.textSecondary,
+      lineHeight: 28,
+      marginBottom: Spacing.xxl,
+      textAlign: 'center',
     },
     emoji: {
       fontSize: 80,
       marginVertical: Spacing.xl,
     },
-    title: {
-      ...Typography.h1,
-      marginBottom: Spacing.md,
-    },
-    description: {
-      ...Typography.bodyLarge,
-      textAlign: 'center',
-      color: theme.textSecondary,
-      lineHeight: 28,
-      marginBottom: Spacing.xxl,
-    },
-    examplesContainer: {
-      width: '100%',
-      marginBottom: Spacing.xl,
-    },
-    examplesTitle: {
-      ...Typography.h3,
-      marginBottom: Spacing.md,
-    },
     exampleCard: {
-      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.primaryLight,
-      padding: Spacing.md,
       borderRadius: 12,
+      flexDirection: 'row',
       marginBottom: Spacing.sm,
+      padding: Spacing.md,
     },
     exampleEmoji: {
       fontSize: 24,
@@ -70,14 +57,30 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
       ...Typography.bodyLarge,
       flex: 1,
     },
+    examplesContainer: {
+      marginBottom: Spacing.xl,
+      width: '100%',
+    },
+    examplesTitle: {
+      ...Typography.h3,
+      marginBottom: Spacing.md,
+    },
+    footer: {
+      padding: Spacing.lg,
+      paddingBottom: Spacing.xl,
+    },
+    header: {
+      alignItems: 'flex-end',
+      marginBottom: Spacing.lg,
+    },
     limitText: {
       ...Typography.body,
       color: theme.textSecondary,
       textAlign: 'center',
     },
-    footer: {
-      padding: Spacing.lg,
-      paddingBottom: Spacing.xl,
+    title: {
+      ...Typography.h1,
+      marginBottom: Spacing.md,
     },
   });
 
@@ -96,9 +99,7 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
         <Text style={styles.title}>{t('onboarding.welcome')}</Text>
 
         {/* Описание */}
-        <Text style={styles.description}>
-          {t('onboarding.subtitle')}
-        </Text>
+        <Text style={styles.description}>{t('onboarding.subtitle')}</Text>
 
         {/* Примеры вопросов */}
         <View style={styles.examplesContainer}>
@@ -109,14 +110,15 @@ export default function OnboardingScreen({ onComplete, onSkip }: OnboardingScree
               <Text style={styles.exampleEmoji}>
                 {index === 0 ? '💬' : index === 1 ? '🍽' : '🥗'}
               </Text>
-              <Text style={styles.exampleText}>"{example}"</Text>
+              <Text style={styles.exampleText}>&quot;{example}&quot;</Text>
             </View>
           ))}
         </View>
 
         {/* Информация о лимите */}
         <Text style={styles.limitText}>
-          {APP_CONFIG.FREE_DAILY_AI_LIMIT} {t('chat.requestsUsed', { used: 0, limit: APP_CONFIG.FREE_DAILY_AI_LIMIT })}
+          {APP_CONFIG.FREE_DAILY_AI_LIMIT}{' '}
+          {t('chat.requestsUsed', { used: 0, limit: APP_CONFIG.FREE_DAILY_AI_LIMIT })}
         </Text>
       </ScrollView>
 

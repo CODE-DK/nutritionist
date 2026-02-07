@@ -7,12 +7,14 @@
 ## Контекст
 
 **Что уже есть (Фаза 1):**
+
 - ✅ База данных: типы User расширены (height, weight, age, gender, goalType, activityLevel, targetWeight)
 - ✅ Калькулятор: BMR/TDEE по формуле Mifflin-St Jeor
 - ✅ Onboarding: 5-шаговая анкета для новых пользователей
 - ✅ Базовые модалки: редактирование имени, веса, калорий, цели
 
 **Что нужно добавить:**
+
 - Секция "Мои показатели" (вес, рост, возраст, пол)
 - Секция "Метаболизм" (BMR, TDEE, целевая норма)
 - Секция "Прогресс к цели" (progress bar, темп изменения)
@@ -73,12 +75,14 @@
 **Файл:** `/src/components/EditPhysicalParamsModal.tsx` (CREATE)
 
 **Функционал:**
+
 - Форма с 4 полями: рост (100-250 см), вес (30-300 кг), возраст (13-120 лет), пол
 - Валидация в реальном времени
 - Чекбокс "Пересчитать калории автоматически?"
 - При сохранении → вызов onSave с данными + флаг recalculateCalories
 
 **Props:**
+
 ```typescript
 interface EditPhysicalParamsModalProps {
   visible: boolean;
@@ -130,6 +134,7 @@ interface EditPhysicalParamsModalProps {
 **Назначение:** Переиспользуемая карточка прогресса с animated progress bar.
 
 **Props:**
+
 ```typescript
 interface ProgressCardProps {
   title: string;
@@ -143,6 +148,7 @@ interface ProgressCardProps {
 ```
 
 **Использование:**
+
 ```tsx
 <ProgressCard
   title="Прогресс к цели"
@@ -164,41 +170,60 @@ interface ProgressCardProps {
 **Файл:** `/src/screens/ProfileScreen.tsx` (MODIFY)
 
 **1. Импорты:**
+
 ```typescript
-import { calculateUserCalories, calculateWeeklyWeightChange, calculateWeeksToGoal } from '../utils/calorieCalculator';
+import {
+  calculateUserCalories,
+  calculateWeeklyWeightChange,
+  calculateWeeksToGoal,
+} from '../utils/calorieCalculator';
 import EditPhysicalParamsModal from '../components/EditPhysicalParamsModal';
 import MetabolismInfoModal from '../components/MetabolismInfoModal';
 import ProgressCard from '../components/ProgressCard';
 ```
 
 **2. State:**
+
 ```typescript
 const [showPhysicalParamsModal, setShowPhysicalParamsModal] = useState(false);
 const [showMetabolismInfoModal, setShowMetabolismInfoModal] = useState(false);
 ```
 
 **3. Расчеты (если профиль заполнен):**
-```typescript
-const hasCompleteProfile = currentUser.height && currentUser.weight &&
-  currentUser.age && currentUser.gender && currentUser.activityLevel && currentUser.goalType;
 
-const metabolismData = hasCompleteProfile ? calculateUserCalories({
-  weight: currentUser.weight!,
-  height: currentUser.height!,
-  age: currentUser.age!,
-  gender: currentUser.gender!,
-  activityLevel: currentUser.activityLevel!,
-  goalType: currentUser.goalType!,
-}) : null;
+```typescript
+const hasCompleteProfile =
+  currentUser.height &&
+  currentUser.weight &&
+  currentUser.age &&
+  currentUser.gender &&
+  currentUser.activityLevel &&
+  currentUser.goalType;
+
+const metabolismData = hasCompleteProfile
+  ? calculateUserCalories({
+      weight: currentUser.weight!,
+      height: currentUser.height!,
+      age: currentUser.age!,
+      gender: currentUser.gender!,
+      activityLevel: currentUser.activityLevel!,
+      goalType: currentUser.goalType!,
+    })
+  : null;
 
 const dailyDeficit = metabolismData ? metabolismData.tdee - metabolismData.targetCalories : 0;
 const weeklyChange = calculateWeeklyWeightChange(dailyDeficit);
-const weeksToGoal = calculateWeeksToGoal(currentUser.weight!, currentUser.targetWeight!, weeklyChange);
+const weeksToGoal = calculateWeeksToGoal(
+  currentUser.weight!,
+  currentUser.targetWeight!,
+  weeklyChange
+);
 ```
 
 **4. Добавить 3 новые секции:**
 
 **Секция 1: Мои показатели**
+
 ```tsx
 <View style={styles.section}>
   <Text style={styles.sectionTitle}>📊 Мои показатели</Text>
@@ -214,39 +239,54 @@ const weeksToGoal = calculateWeeksToGoal(currentUser.weight!, currentUser.target
 ```
 
 **Секция 2: Метаболизм**
+
 ```tsx
-{hasCompleteProfile && (
-  <View style={styles.section}>
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>🔥 Метаболизм</Text>
-      <TouchableOpacity onPress={() => setShowMetabolismInfoModal(true)}>
-        <Ionicons name="information-circle-outline" size={24} />
-      </TouchableOpacity>
+{
+  hasCompleteProfile && (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>🔥 Метаболизм</Text>
+        <TouchableOpacity onPress={() => setShowMetabolismInfoModal(true)}>
+          <Ionicons name="information-circle-outline" size={24} />
+        </TouchableOpacity>
+      </View>
+      <StatRow label="BMR (базовый)" value={`${metabolismData.bmr} ккал/день`} color="green" />
+      <StatRow
+        label="TDEE (с активностью)"
+        value={`${metabolismData.tdee} ккал/день`}
+        color="blue"
+      />
+      <StatRow
+        label="Ваша норма"
+        value={`${metabolismData.targetCalories} ккал/день`}
+        color="orange"
+      />
+      <StatRow label="" value={`(дефицит ${dailyDeficit})`} color="red" />
     </View>
-    <StatRow label="BMR (базовый)" value={`${metabolismData.bmr} ккал/день`} color="green" />
-    <StatRow label="TDEE (с активностью)" value={`${metabolismData.tdee} ккал/день`} color="blue" />
-    <StatRow label="Ваша норма" value={`${metabolismData.targetCalories} ккал/день`} color="orange" />
-    <StatRow label="" value={`(дефицит ${dailyDeficit})`} color="red" />
-  </View>
-)}
+  );
+}
 ```
 
 **Секция 3: Прогресс**
+
 ```tsx
-{hasCompleteProfile && currentUser.targetWeight && (
-  <ProgressCard
-    title="🎯 Прогресс к цели"
-    current={currentUser.weight!}
-    target={currentUser.targetWeight}
-    unit="кг"
-    percentage={calculateProgress()}
-    estimatedWeeks={weeksToGoal}
-    weeklyChange={weeklyChange}
-  />
-)}
+{
+  hasCompleteProfile && currentUser.targetWeight && (
+    <ProgressCard
+      title="🎯 Прогресс к цели"
+      current={currentUser.weight!}
+      target={currentUser.targetWeight}
+      unit="кг"
+      percentage={calculateProgress()}
+      estimatedWeeks={weeksToGoal}
+      weeklyChange={weeklyChange}
+    />
+  );
+}
 ```
 
 **5. Обработчик сохранения:**
+
 ```typescript
 const handleSavePhysicalParams = async (updates: any) => {
   let finalUpdates = { ...updates };
@@ -269,6 +309,7 @@ const handleSavePhysicalParams = async (updates: any) => {
 ```
 
 **6. Модалки в render:**
+
 ```tsx
 <EditPhysicalParamsModal
   visible={showPhysicalParamsModal}
@@ -290,11 +331,13 @@ const handleSavePhysicalParams = async (updates: any) => {
 **Файл:** `/src/utils/calorieCalculator.ts` (VERIFY)
 
 **Убедиться что есть функции:**
+
 - `calculateUserCalories()` - основной расчет BMR/TDEE/targetCalories
 - `calculateWeeklyWeightChange(dailyDeficit)` - темп изменения веса
 - `calculateWeeksToGoal(current, target, weeklyChange)` - время до цели
 
 **Если нет - добавить:**
+
 ```typescript
 export function calculateWeeklyWeightChange(dailyDeficit: number): number {
   // 7700 ккал = 1 кг веса
@@ -317,6 +360,7 @@ export function calculateWeeksToGoal(
 ## Verification (End-to-End)
 
 ### Test Case 1: Заполненный профиль
+
 1. Открыть ProfileScreen с пользователем (все поля заполнены)
 2. **Expected:** Видны 3 новые секции:
    - 📊 Мои показатели (вес, рост, возраст, пол)
@@ -328,11 +372,13 @@ export function calculateWeeksToGoal(
 6. **Expected:** Открылась EditPhysicalParamsModal с текущими значениями
 
 ### Test Case 2: Незаполненный профиль
+
 1. Открыть ProfileScreen с пользователем без height/weight/age
 2. **Expected:** Секции "Метаболизм" и "Прогресс" скрыты
 3. **Expected:** Видна только секция "Мои показатели" с призывом заполнить
 
 ### Test Case 3: Редактирование параметров
+
 1. В EditPhysicalParamsModal изменить вес с 80 кг на 75 кг
 2. Включить чекбокс "Пересчитать калории автоматически"
 3. Tap "Сохранить"
@@ -343,18 +389,21 @@ export function calculateWeeksToGoal(
    - Секция "Прогресс" показывает новое время до цели
 
 ### Test Case 4: Progress bar анимация
+
 1. Открыть ProfileScreen
 2. **Expected:** Progress bar анимированно заполняется от 0% до текущего значения
 3. Изменить вес → вернуться на ProfileScreen
 4. **Expected:** Progress bar re-анимируется с новым значением
 
 ### Test Case 5: Валидация
+
 1. В EditPhysicalParamsModal ввести возраст = 10 (< 13)
 2. **Expected:** Показать ошибку "Минимальный возраст: 13 лет"
 3. Ввести вес = 500 кг (> 300)
 4. **Expected:** Показать ошибку "Максимальный вес: 300 кг"
 
 ### Database Verification:
+
 ```sql
 -- Проверить что данные сохранились
 SELECT id, email, height, weight, age, gender, daily_calorie_goal
@@ -364,6 +413,7 @@ LIMIT 1;
 ```
 
 ### UI Verification:
+
 - Все секции используют theme colors из ThemeContext
 - Spacing между элементами согласован (Spacing.sm/md/lg)
 - Шрифты соответствуют Typography (h2, h3, body, caption)
@@ -375,11 +425,13 @@ LIMIT 1;
 ## Success Metrics
 
 **Primary:**
+
 - ✓ Все 3 новые секции отображаются корректно
 - ✓ Расчеты BMR/TDEE/прогресс математически верны
 - ✓ Редактирование параметров → обновление UI в реальном времени
 
 **Secondary:**
+
 - Progress bar анимация работает плавно (60 fps)
 - Модалки открываются < 300ms
 - Валидация ловит все edge cases (возраст, вес, рост)

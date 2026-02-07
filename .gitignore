@@ -6,6 +6,14 @@
 # Dependencies
 node_modules/
 
+# Lock files (only pnpm-lock.yaml is tracked)
+package-lock.json
+yarn.lock
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log
+
 # Expo
 .expo/
 .expo-shared/
@@ -37,3 +45,6 @@ yarn-error.*
 .temp/
 supabase/.branches/
 supabase/.temp/
+
+# claude
+.claude/
