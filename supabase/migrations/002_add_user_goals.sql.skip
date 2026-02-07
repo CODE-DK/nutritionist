@@ -1,0 +1,96 @@
+-- Migration: Add user goals and physical parameters
+-- Description: Добавляет поля для целей пользователя, физических параметров и расчета калорий
+-- Created: 2026-02-06
+
+-- Добавляем новые поля в таблицу users
+ALTER TABLE public.users
+  -- Физические параметры
+  ADD COLUMN height integer CHECK (height IS NULL OR (height >= 100 AND height <= 250)),
+  ADD COLUMN weight numeric(5,2) CHECK (weight IS NULL OR (weight >= 30 AND weight <= 300)),
+  ADD COLUMN age integer CHECK (age IS NULL OR (age >= 13 AND age <= 120)),
+  ADD COLUMN gender text CHECK (gender IS NULL OR gender IN ('male', 'female')),
+
+  -- Цели и активность
+  ADD COLUMN activity_level text CHECK (
+    activity_level IS NULL OR
+    activity_level IN ('sedentary', 'light', 'moderate', 'active', 'very_active')
+  ),
+  ADD COLUMN goal_type text CHECK (
+    goal_type IS NULL OR
+    goal_type IN ('lose_weight', 'maintain', 'gain_weight')
+  ),
+  ADD COLUMN target_weight numeric(5,2) CHECK (
+    target_weight IS NULL OR
+    (target_weight >= 30 AND target_weight <= 300)
+  ),
+
+  -- Целевая норма калорий (рассчитывается на основе параметров)
+  ADD COLUMN target_calories integer CHECK (
+    target_calories IS NULL OR
+    (target_calories >= 800 AND target_calories <= 5000)
+  );
+
+-- Комментарии к полям для документации
+COMMENT ON COLUMN public.users.height IS 'Рост пользователя в см (100-250)';
+COMMENT ON COLUMN public.users.weight IS 'Текущий вес пользователя в кг (30-300)';
+COMMENT ON COLUMN public.users.age IS 'Возраст пользователя в годах (13-120)';
+COMMENT ON COLUMN public.users.gender IS 'Пол пользователя: male (мужской) или female (женский)';
+COMMENT ON COLUMN public.users.activity_level IS 'Уровень физической активности: sedentary, light, moderate, active, very_active';
+COMMENT ON COLUMN public.users.goal_type IS 'Цель пользователя: lose_weight (похудение), maintain (поддержание), gain_weight (набор массы)';
+COMMENT ON COLUMN public.users.target_weight IS 'Целевой вес в кг (30-300)';
+COMMENT ON COLUMN public.users.target_calories IS 'Целевая норма калорий в день (800-5000), рассчитывается автоматически';
+
+-- Создаем индекс для быстрого поиска пользователей с заполненным профилем
+CREATE INDEX idx_users_profile_completed ON public.users(id)
+  WHERE height IS NOT NULL
+    AND weight IS NOT NULL
+    AND age IS NOT NULL
+    AND gender IS NOT NULL
+    AND goal_type IS NOT NULL;
+
+-- Функция для проверки завершенности профиля
+CREATE OR REPLACE FUNCTION public.is_profile_completed(user_id uuid)
+RETURNS boolean AS $$
+DECLARE
+  result boolean;
+BEGIN
+  SELECT
+    height IS NOT NULL AND
+    weight IS NOT NULL AND
+    age IS NOT NULL AND
+    gender IS NOT NULL AND
+    activity_level IS NOT NULL AND
+    goal_type IS NOT NULL AND
+    target_calories IS NOT NULL
+  INTO result
+  FROM public.users
+  WHERE id = user_id;
+
+  RETURN COALESCE(result, false);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION public.is_profile_completed IS 'Проверяет, заполнен ли профиль пользователя полностью';
+
+-- Примеры использования:
+--
+-- 1. Обновление профиля пользователя:
+-- UPDATE public.users
+-- SET
+--   height = 175,
+--   weight = 80,
+--   age = 30,
+--   gender = 'male',
+--   activity_level = 'moderate',
+--   goal_type = 'lose_weight',
+--   target_weight = 75,
+--   target_calories = 2000
+-- WHERE id = 'user-uuid';
+--
+-- 2. Проверка завершенности профиля:
+-- SELECT is_profile_completed('user-uuid');
+--
+-- 3. Получение пользователей с незавершенным профилем:
+-- SELECT id, email FROM auth.users au
+-- JOIN public.users u ON u.id = au.id
+-- WHERE NOT is_profile_completed(u.id);

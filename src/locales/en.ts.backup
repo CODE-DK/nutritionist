@@ -1,0 +1,149 @@
+export default {
+  translation: {
+    // Common
+    common: {
+      save: 'Save',
+      cancel: 'Cancel',
+      close: 'Close',
+      error: 'Error',
+      success: 'Success',
+    },
+
+    // Goal types
+    goalTypes: {
+      lose_weight: 'Lose Weight',
+      maintain: 'Maintain Weight',
+      gain_weight: 'Gain Muscle',
+    },
+
+    // Activity levels
+    activityLevels: {
+      sedentary: 'Sedentary Lifestyle',
+      light: 'Light Activity (1-3 times/week)',
+      moderate: 'Moderate Activity (3-5 times/week)',
+      active: 'High Activity (6-7 times/week)',
+      very_active: 'Very High Activity (2+ times/day)',
+    },
+
+    // Profile
+    profile: {
+      title: 'Profile',
+      user: 'User',
+      editHint: 'Tap to edit',
+
+      // Subscription
+      subscription: {
+        free: 'FREE',
+        premium: '⭐ PREMIUM',
+        premiumUntil: 'Active until {{date}}',
+        upgradeToPremium: 'Upgrade to Premium for unlimited access',
+        upgradeButton: 'Upgrade to Premium ⭐',
+      },
+
+      // Settings sections
+      sections: {
+        goalSettings: 'Goal Settings',
+        appSettings: 'Application',
+      },
+
+      // Goal settings
+      goalSettings: {
+        targetWeight: 'Target Weight',
+        targetWeightValue: '{{weight}} kg',
+        notSet: 'Not set',
+        dailyCalories: 'Daily Calorie Goal',
+        dailyCaloriesValue: '{{calories}} kcal',
+        goal: 'Goal',
+        goalNotSet: 'Not set',
+      },
+
+      // App settings
+      appSettings: {
+        notifications: 'Notifications',
+        theme: 'App Theme',
+        language: 'Language',
+        about: 'About',
+      },
+
+      // Theme
+      theme: {
+        selectTheme: 'Select Theme',
+        light: 'Light',
+        dark: 'Dark',
+        auto: 'Auto (System)',
+      },
+
+      // Language
+      language: {
+        selectLanguage: 'Select Language',
+        russian: 'Русский',
+        english: 'English',
+      },
+
+      // Actions
+      actions: {
+        logout: 'Log Out',
+        logoutTitle: 'Log Out',
+        logoutMessage: 'Are you sure you want to log out?',
+        cancel: 'Cancel',
+        confirm: 'Log Out',
+      },
+
+      // Alerts
+      alerts: {
+        success: 'Success',
+        profileUpdated: 'Profile updated',
+        error: 'Error',
+        updateFailed: 'Failed to update profile',
+      },
+
+      // Edit modals
+      editModals: {
+        editName: 'Edit Name',
+        enterName: 'Enter name',
+        pleaseEnterName: 'Please enter a name',
+
+        editTargetWeight: 'Target Weight',
+        enterTargetWeight: 'Enter target weight',
+        invalidWeight: 'Please enter a valid weight (30-300 kg)',
+        targetWeightLowerForLoss: 'Target weight must be lower than current weight for weight loss',
+        targetWeightHigherForGain: 'Target weight must be higher than current weight for muscle gain',
+        currentWeight: 'Current weight: {{weight}} kg',
+        yourGoal: 'Your goal: {{goal}}',
+
+        editCalories: 'Daily Calorie Goal',
+        enterCalories: 'Enter calorie goal',
+        invalidCalories: 'Please enter a valid value (1200-5000 kcal)',
+        recommended: 'Recommended: {{calories}} kcal',
+        basedOnProfile: 'Based on your profile',
+
+        selectGoal: 'Select Goal',
+      },
+    },
+
+    // Paywall
+    paywall: {
+      title: 'Upgrade to Premium',
+      description: 'Get unlimited access to all features',
+      features: {
+        unlimitedAI: 'Unlimited AI requests',
+        unlimitedPhotos: '📸 Unlimited photo recognition',
+        photoHistory: 'Photo history',
+        advancedStats: 'Advanced statistics',
+        exportData: 'Export data to PDF/CSV',
+        mealPlanning: 'Weekly meal planning',
+        prioritySupport: 'Priority support',
+        noAds: 'No ads',
+      },
+      pricing: {
+        monthly: '$4.99 / month',
+        yearly: '$49.99 / year (17% off)',
+      },
+      actions: {
+        upgrade: 'Upgrade to Premium ⭐',
+        comingSoon: 'Coming Soon',
+        backToFree: 'Back to Free version',
+      },
+    },
+  },
+};

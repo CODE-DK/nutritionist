@@ -1,0 +1,600 @@
+/**
+ * OnboardingQuestionnaire - многошаговая анкета для сбора данных пользователя
+ *
+ * Собирает физические параметры, цели и уровень активности
+ * для расчета персонализированной нормы калорий
+ */
+
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import Button from '../components/Button';
+import Card from '../components/Card';
+import { Typography, Spacing, BorderRadius } from '../config/theme';
+import { useTheme } from '../config/ThemeContext';
+import { calculateUserCalories, getActivityLevelLabel, getGoalTypeLabel } from '../utils/calorieCalculator';
+import type { Gender, ActivityLevel, GoalType, User } from '../types';
+import authService from '../services/authService';
+import analyticsService from '../services/analyticsService';
+
+interface OnboardingQuestionnaireProps {
+  user: User;
+  onComplete: (updatedUser: User) => void;
+}
+
+type Step = 'gender_age' | 'height_weight' | 'goal' | 'activity' | 'target_weight' | 'summary';
+
+export default function OnboardingQuestionnaire({ user, onComplete }: OnboardingQuestionnaireProps) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState<Step>('gender_age');
+  const [loading, setLoading] = useState(false);
+
+  // Данные анкеты
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [age, setAge] = useState('');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [goalType, setGoalType] = useState<GoalType | null>(null);
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel | null>(null);
+  const [targetWeight, setTargetWeight] = useState('');
+
+  const totalSteps = 5;
+  const currentStepNumber = {
+    gender_age: 1,
+    height_weight: 2,
+    goal: 3,
+    activity: 4,
+    target_weight: 5,
+    summary: 5,
+  }[currentStep];
+
+  const handleNext = () => {
+    if (currentStep === 'gender_age') {
+      if (!gender || !age || parseInt(age) < 13 || parseInt(age) > 120) {
+        Alert.alert(t('common.error'), t('diary.addMealModal.invalidValues'));
+        return;
+      }
+      setCurrentStep('height_weight');
+    } else if (currentStep === 'height_weight') {
+      const h = parseInt(height);
+      const w = parseFloat(weight);
+      if (!h || !w || h < 100 || h > 250 || w < 30 || w > 300) {
+        Alert.alert(t('common.error'), t('profile.editModals.invalidWeight'));
+        return;
+      }
+      setCurrentStep('goal');
+    } else if (currentStep === 'goal') {
+      if (!goalType) {
+        Alert.alert(t('common.error'), t('profile.editModals.selectGoal'));
+        return;
+      }
+      setCurrentStep('activity');
+    } else if (currentStep === 'activity') {
+      if (!activityLevel) {
+        Alert.alert(t('common.error'), t('diary.addMealModal.invalidValues'));
+        return;
+      }
+      // Если цель - похудение или набор, спрашиваем целевой вес
+      if (goalType === 'lose_weight' || goalType === 'gain_weight') {
+        setCurrentStep('target_weight');
+      } else {
+        // Для поддержания веса целевой вес = текущему
+        setTargetWeight(weight);
+        setCurrentStep('summary');
+      }
+    } else if (currentStep === 'target_weight') {
+      const tw = parseFloat(targetWeight);
+      const w = parseFloat(weight);
+      if (!tw || tw < 30 || tw > 300) {
+        Alert.alert(t('common.error'), t('profile.editModals.invalidWeight'));
+        return;
+      }
+      if (goalType === 'lose_weight' && tw >= w) {
+        Alert.alert(t('common.error'), t('profile.editModals.targetWeightLowerForLoss'));
+        return;
+      }
+      if (goalType === 'gain_weight' && tw <= w) {
+        Alert.alert(t('common.error'), t('profile.editModals.targetWeightHigherForGain'));
+        return;
+      }
+      setCurrentStep('summary');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep === 'height_weight') setCurrentStep('gender_age');
+    else if (currentStep === 'goal') setCurrentStep('height_weight');
+    else if (currentStep === 'activity') setCurrentStep('goal');
+    else if (currentStep === 'target_weight') setCurrentStep('activity');
+    else if (currentStep === 'summary') {
+      if (goalType === 'lose_weight' || goalType === 'gain_weight') {
+        setCurrentStep('target_weight');
+      } else {
+        setCurrentStep('activity');
+      }
+    }
+  };
+
+  const handleComplete = async () => {
+    if (!gender || !age || !height || !weight || !goalType || !activityLevel) {
+      Alert.alert(t('common.error'), t('diary.addMealModal.invalidValues'));
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Рассчитываем калории
+      const { targetCalories } = calculateUserCalories({
+        weight: parseFloat(weight),
+        height: parseInt(height),
+        age: parseInt(age),
+        gender,
+        activityLevel,
+        goalType,
+      });
+
+      // Обновляем профиль
+      const updatedUser = await authService.updateProfile(user.id, {
+        gender,
+        age: parseInt(age),
+        height: parseInt(height),
+        weight: parseFloat(weight),
+        goalType,
+        activityLevel,
+        targetWeight: parseFloat(targetWeight),
+        dailyCalorieGoal: targetCalories,
+      });
+
+      analyticsService.track('onboarding_questionnaire_completed', {
+        gender,
+        age: parseInt(age),
+        goalType,
+        activityLevel,
+        targetCalories,
+      });
+
+      onComplete(updatedUser);
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error.message || t('profile.alerts.updateFailed'));
+      setLoading(false);
+    }
+  };
+
+  const renderProgressBar = () => (
+    <View style={styles.progressContainer}>
+      <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
+        <View
+          style={[
+            styles.progressFill,
+            { backgroundColor: theme.primary, width: `${(currentStepNumber / totalSteps) * 100}%` },
+          ]}
+        />
+      </View>
+      <Text style={[styles.progressText, { color: theme.textSecondary }]}>
+        {t('onboarding.next')} {currentStepNumber} / {totalSteps}
+      </Text>
+    </View>
+  );
+
+  const renderGenderAgeStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.user')}</Text>
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        {t('profile.editModals.basedOnProfile')}
+      </Text>
+
+      <Text style={[styles.label, { color: theme.text }]}>{t('profile.user')}</Text>
+      <View style={styles.genderContainer}>
+        <TouchableOpacity
+          style={[
+            styles.genderOption,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+            gender === 'male' && { borderColor: theme.primary, borderWidth: 2 },
+          ]}
+          onPress={() => setGender('male')}
+        >
+          <Text style={styles.genderEmoji}>👨</Text>
+          <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
+          {gender === 'male' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.genderOption,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+            gender === 'female' && { borderColor: theme.primary, borderWidth: 2 },
+          ]}
+          onPress={() => setGender('female')}
+        >
+          <Text style={styles.genderEmoji}>👩</Text>
+          <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
+          {gender === 'female' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        </TouchableOpacity>
+      </View>
+
+      <Text style={[styles.label, { color: theme.text }]}>{t('profile.user')}</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        placeholder={t('diary.addMealModal.enterMealName')}
+        placeholderTextColor={theme.disabled}
+        keyboardType="number-pad"
+        value={age}
+        onChangeText={setAge}
+        maxLength={3}
+      />
+    </View>
+  );
+
+  const renderHeightWeightStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        {t('profile.editModals.currentWeight', { weight: 0 })}
+      </Text>
+
+      <Text style={[styles.label, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        placeholder="175"
+        placeholderTextColor={theme.disabled}
+        keyboardType="number-pad"
+        value={height}
+        onChangeText={setHeight}
+        maxLength={3}
+      />
+
+      <Text style={[styles.label, { color: theme.text }]}>{t('profile.editModals.currentWeight', { weight: '' })}</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        placeholder="70.5"
+        placeholderTextColor={theme.disabled}
+        keyboardType="decimal-pad"
+        value={weight}
+        onChangeText={setWeight}
+        maxLength={5}
+      />
+    </View>
+  );
+
+  const renderGoalStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.goal')}</Text>
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        {t('profile.editModals.selectGoal')}
+      </Text>
+
+      <TouchableOpacity
+        style={[
+          styles.goalOption,
+          { backgroundColor: theme.surface, borderColor: theme.border },
+          goalType === 'lose_weight' && { borderColor: theme.primary, borderWidth: 2 },
+        ]}
+        onPress={() => setGoalType('lose_weight')}
+      >
+        <View style={styles.goalLeft}>
+          <Text style={styles.goalEmoji}>📉</Text>
+          <View>
+            <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.lose_weight')}</Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.lose_weight')}</Text>
+          </View>
+        </View>
+        {goalType === 'lose_weight' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.goalOption,
+          { backgroundColor: theme.surface, borderColor: theme.border },
+          goalType === 'maintain' && { borderColor: theme.primary, borderWidth: 2 },
+        ]}
+        onPress={() => setGoalType('maintain')}
+      >
+        <View style={styles.goalLeft}>
+          <Text style={styles.goalEmoji}>➡️</Text>
+          <View>
+            <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.maintain')}</Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.maintain')}</Text>
+          </View>
+        </View>
+        {goalType === 'maintain' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.goalOption,
+          { backgroundColor: theme.surface, borderColor: theme.border },
+          goalType === 'gain_weight' && { borderColor: theme.primary, borderWidth: 2 },
+        ]}
+        onPress={() => setGoalType('gain_weight')}
+      >
+        <View style={styles.goalLeft}>
+          <Text style={styles.goalEmoji}>📈</Text>
+          <View>
+            <Text style={[styles.goalTitle, { color: theme.text }]}>{t('goalTypes.gain_weight')}</Text>
+            <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>{t('goalTypes.gain_weight')}</Text>
+          </View>
+        </View>
+        {goalType === 'gain_weight' && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderActivityStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.goal')}</Text>
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        {t('profile.editModals.selectGoal')}
+      </Text>
+
+      {(['sedentary', 'light', 'moderate', 'active', 'very_active'] as ActivityLevel[]).map((level) => (
+        <TouchableOpacity
+          key={level}
+          style={[
+            styles.activityOption,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+            activityLevel === level && { borderColor: theme.primary, borderWidth: 2 },
+          ]}
+          onPress={() => setActivityLevel(level)}
+        >
+          <View style={styles.activityLeft}>
+            <Text style={[styles.activityTitle, { color: theme.text }]}>{getActivityLevelLabel(level)}</Text>
+          </View>
+          {activityLevel === level && <Ionicons name="checkmark-circle" size={24} color={theme.primary} />}
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  const renderTargetWeightStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        {t('profile.editModals.editTargetWeight')}
+      </Text>
+
+      <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+        <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.editModals.currentWeight', { weight: '' })}</Text>
+        <Text style={[styles.summaryValue, { color: theme.text }]}>{weight} {t('diary.calories')}</Text>
+      </View>
+
+      <Text style={[styles.label, { color: theme.text }]}>{t('profile.goalSettings.targetWeight')}</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+        placeholder={goalType === 'lose_weight' ? t('profile.editModals.targetWeightLowerForLoss') : t('profile.editModals.targetWeightHigherForGain')}
+        placeholderTextColor={theme.disabled}
+        keyboardType="decimal-pad"
+        value={targetWeight}
+        onChangeText={setTargetWeight}
+        maxLength={5}
+      />
+    </View>
+  );
+
+  const renderSummaryStep = () => {
+    if (!gender || !age || !height || !weight || !goalType || !activityLevel) return null;
+
+    const { bmr, tdee, targetCalories } = calculateUserCalories({
+      weight: parseFloat(weight),
+      height: parseInt(height),
+      age: parseInt(age),
+      gender,
+      activityLevel,
+      goalType,
+    });
+
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.text }]}>{t('common.success')}!</Text>
+        <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+          {t('profile.editModals.recommended', { calories: targetCalories })}
+        </Text>
+
+        <Card style={[styles.calorieCard, { backgroundColor: theme.primaryLight }]}>
+          <Text style={[styles.calorieValue, { color: theme.primary }]}>{targetCalories}</Text>
+          <Text style={[styles.calorieLabel, { color: theme.primary }]}>{t('diary.calories')}</Text>
+        </Card>
+
+        <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.goalSettings.goal')}</Text>
+          <Text style={[styles.summaryValue, { color: theme.text }]}>{getGoalTypeLabel(goalType)}</Text>
+        </View>
+
+        <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('profile.goalSettings.targetWeight')}</Text>
+          <Text style={[styles.summaryValue, { color: theme.text }]}>
+            {weight} → {targetWeight}
+          </Text>
+        </View>
+
+        <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('diary.calories')}</Text>
+          <Text style={[styles.summaryValue, { color: theme.text }]}>{bmr}</Text>
+        </View>
+
+        <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>{t('diary.goal')}</Text>
+          <Text style={[styles.summaryValue, { color: theme.text }]}>{tdee}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
+      {renderProgressBar()}
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {currentStep === 'gender_age' && renderGenderAgeStep()}
+        {currentStep === 'height_weight' && renderHeightWeightStep()}
+        {currentStep === 'goal' && renderGoalStep()}
+        {currentStep === 'activity' && renderActivityStep()}
+        {currentStep === 'target_weight' && renderTargetWeightStep()}
+        {currentStep === 'summary' && renderSummaryStep()}
+      </ScrollView>
+
+      <View style={styles.footer}>
+        {currentStep !== 'gender_age' && (
+          <Button title={t('common.cancel')} variant="secondary" onPress={handleBack} style={styles.backButton} />
+        )}
+        {currentStep !== 'summary' ? (
+          <Button title={t('onboarding.next')} onPress={handleNext} style={styles.nextButton} />
+        ) : (
+          <Button
+            title={t('common.save')}
+            onPress={handleComplete}
+            loading={loading}
+            disabled={loading}
+            style={styles.nextButton}
+          />
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  progressContainer: {
+    padding: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  progressBar: {
+    height: 4,
+    borderRadius: 2,
+    marginBottom: Spacing.xs,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  progressText: {
+    ...Typography.caption,
+    textAlign: 'center',
+  },
+  content: {
+    flex: 1,
+    padding: Spacing.md,
+  },
+  stepContainer: {
+    paddingBottom: Spacing.xl,
+  },
+  stepTitle: {
+    ...Typography.h2,
+    marginBottom: Spacing.xs,
+  },
+  stepDescription: {
+    ...Typography.body,
+    marginBottom: Spacing.lg,
+  },
+  label: {
+    ...Typography.bodyLarge,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  input: {
+    ...Typography.bodyLarge,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+  },
+  genderContainer: {
+    marginBottom: Spacing.md,
+  },
+  genderOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+  },
+  genderEmoji: {
+    fontSize: 32,
+    marginRight: Spacing.md,
+  },
+  genderText: {
+    ...Typography.bodyLarge,
+    flex: 1,
+  },
+  goalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+  },
+  goalLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  goalEmoji: {
+    fontSize: 32,
+    marginRight: Spacing.md,
+  },
+  goalTitle: {
+    ...Typography.bodyLarge,
+  },
+  goalSubtitle: {
+    ...Typography.caption,
+  },
+  activityOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.medium,
+    borderWidth: 1,
+    marginBottom: Spacing.sm,
+  },
+  activityLeft: {
+    flex: 1,
+  },
+  activityTitle: {
+    ...Typography.body,
+  },
+  calorieCard: {
+    alignItems: 'center',
+    padding: Spacing.xl,
+    marginBottom: Spacing.md,
+  },
+  calorieValue: {
+    ...Typography.h1,
+    fontSize: 48,
+  },
+  calorieLabel: {
+    ...Typography.bodyLarge,
+  },
+  summaryCard: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.medium,
+    marginBottom: Spacing.sm,
+  },
+  summaryLabel: {
+    ...Typography.caption,
+    marginBottom: Spacing.xs,
+  },
+  summaryValue: {
+    ...Typography.bodyLarge,
+  },
+  footer: {
+    flexDirection: 'row',
+    padding: Spacing.md,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  backButton: {
+    flex: 1,
+  },
+  nextButton: {
+    flex: 2,
+  },
+});

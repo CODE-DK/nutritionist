@@ -1,0 +1,39 @@
+# Environment variables (кроме example)
+.env
+.env.production
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS
+.DS_Store
+*.pem
+
+# Local
+.vscode/
+.idea/
+
+# Supabase
+.branches/
+.temp/
+supabase/.branches/
+supabase/.temp/
