@@ -2,7 +2,16 @@
 
 import React, { useState } from 'react';
 
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Switch,
+} from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +53,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
   const { t, i18n } = useTranslation();
   const { signOut, updateUser: updateAuthUser } = useAuth();
   const [currentUser, setCurrentUser] = useState(user);
+  const [loading, setLoading] = useState(false);
 
   // Modal states
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -54,6 +64,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showPhysicalParamsModal, setShowPhysicalParamsModal] = useState(false);
   const [showMetabolismInfoModal, setShowMetabolismInfoModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(t('profile.actions.logoutTitle'), t('profile.actions.logoutMessage'), [
@@ -157,6 +168,21 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
     setShowPhysicalParamsModal(false);
   };
 
+  const handleToggleDailyTips = async (value: boolean) => {
+    setLoading(true);
+    try {
+      await updateAuthUser({ showDailyTips: value });
+      const updatedUser = { ...currentUser, showDailyTips: value };
+      setCurrentUser(updatedUser);
+      onUserUpdate?.(updatedUser);
+      analyticsService.track(value ? 'daily_tips_enabled' : 'daily_tips_disabled');
+    } catch (error: any) {
+      Alert.alert(t('profile.alerts.error'), error.message || t('profile.alerts.updateFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Проверка заполненности профиля для отображения метаболических данных
   const hasCompleteProfile =
     currentUser.height &&
@@ -204,6 +230,291 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
 
   const isPremium = currentUser.subscription === 'premium';
 
+  const styles = StyleSheet.create({
+    avatar: {
+      alignItems: 'center',
+      borderRadius: 40,
+      height: 80,
+      justifyContent: 'center',
+      marginBottom: Spacing.md,
+      width: 80,
+    },
+    avatarText: {
+      fontSize: 40,
+    },
+    container: {
+      flex: 1,
+    },
+    content: {
+      flex: 1,
+      padding: Spacing.md,
+    },
+    header: {
+      borderBottomWidth: 1,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.md,
+    },
+    editHint: {
+      ...Typography.caption,
+      marginTop: Spacing.xs,
+    },
+    headerTitle: {
+      ...Typography.h3,
+    },
+    userEmail: {
+      ...Typography.body,
+    },
+    userInfo: {
+      alignItems: 'center',
+      paddingVertical: Spacing.xl,
+    },
+    userName: {
+      ...Typography.h2,
+      marginBottom: Spacing.xs,
+    },
+    subscriptionCard: {
+      marginBottom: Spacing.lg,
+    },
+    premiumCard: {
+      backgroundColor: '#FFD700',
+    },
+    subscriptionHeader: {
+      marginBottom: Spacing.sm,
+    },
+    subscriptionType: {
+      ...Typography.h3,
+    },
+    subscriptionDescription: {
+      ...Typography.body,
+      marginBottom: Spacing.md,
+    },
+    upgradeButton: {
+      marginTop: Spacing.sm,
+    },
+    sectionTitle: {
+      ...Typography.h3,
+      marginBottom: Spacing.md,
+      marginTop: Spacing.lg,
+    },
+    settingItem: {
+      alignItems: 'center',
+      borderRadius: BorderRadius.medium,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+      padding: Spacing.md,
+    },
+    settingLeft: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      flex: 1,
+    },
+    settingTitle: {
+      ...Typography.bodyLarge,
+      marginLeft: Spacing.md,
+    },
+    settingTextContainer: {
+      flex: 1,
+      marginLeft: Spacing.md,
+    },
+    settingDescription: {
+      ...Typography.caption,
+      marginTop: Spacing.xs,
+    },
+    settingRight: {
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    settingValue: {
+      ...Typography.body,
+      marginRight: Spacing.sm,
+    },
+    logoutContainer: {
+      marginBottom: Spacing.xxl,
+      marginTop: Spacing.xl,
+    },
+    modalOverlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      borderTopLeftRadius: BorderRadius.large,
+      borderTopRightRadius: BorderRadius.large,
+      maxHeight: '50%',
+      padding: Spacing.lg,
+    },
+    modalHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.lg,
+    },
+    modalTitle: {
+      ...Typography.h2,
+    },
+    themeOption: {
+      alignItems: 'center',
+      borderColor: 'transparent',
+      borderRadius: BorderRadius.medium,
+      borderWidth: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+      padding: Spacing.md,
+    },
+    themeOptionLeft: {
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    themeOptionText: {
+      ...Typography.bodyLarge,
+      marginLeft: Spacing.md,
+    },
+    languageFlag: {
+      fontSize: 24,
+      marginRight: Spacing.xs,
+    },
+    physicalParamsCard: {
+      marginBottom: Spacing.lg,
+    },
+    metabolismCard: {
+      marginBottom: Spacing.lg,
+    },
+    sectionHeaderRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.md,
+    },
+    sectionTitleWithEmoji: {
+      ...Typography.h3,
+    },
+    statsGrid: {
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    statRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: Spacing.sm,
+    },
+    statLabel: {
+      ...Typography.body,
+    },
+    statRight: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: Spacing.sm,
+    },
+    statValue: {
+      ...Typography.bodyLarge,
+    },
+    badge: {
+      borderRadius: BorderRadius.small,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 4,
+    },
+    badgeText: {
+      ...Typography.caption,
+      fontWeight: '600',
+    },
+    editButton: {
+      marginTop: Spacing.sm,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: Spacing.lg,
+    },
+    emptyStateText: {
+      ...Typography.body,
+      marginBottom: Spacing.md,
+      textAlign: 'center',
+    },
+    fillButton: {
+      minWidth: 150,
+    },
+    metabolismStats: {
+      gap: Spacing.sm,
+    },
+    metabolismRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      paddingVertical: Spacing.sm,
+    },
+    colorIndicator: {
+      borderRadius: 2,
+      height: 16,
+      marginRight: Spacing.md,
+      width: 4,
+    },
+    metabolismLabel: {
+      ...Typography.body,
+      flex: 1,
+    },
+    metabolismValue: {
+      ...Typography.bodyLarge,
+    },
+    aboutModalContent: {
+      borderTopLeftRadius: BorderRadius.large,
+      borderTopRightRadius: BorderRadius.large,
+      maxHeight: '80%',
+      padding: Spacing.lg,
+    },
+    aboutSection: {
+      marginBottom: Spacing.lg,
+    },
+    aboutAppName: {
+      ...Typography.h1,
+      marginBottom: Spacing.xs,
+      textAlign: 'center',
+    },
+    aboutTagline: {
+      ...Typography.body,
+      marginBottom: Spacing.sm,
+      textAlign: 'center',
+    },
+    aboutVersion: {
+      ...Typography.caption,
+      marginBottom: Spacing.xl,
+      textAlign: 'center',
+    },
+    aboutDescription: {
+      ...Typography.body,
+      lineHeight: 22,
+      marginBottom: Spacing.xl,
+      textAlign: 'center',
+    },
+    aboutSectionTitle: {
+      ...Typography.h3,
+      marginBottom: Spacing.md,
+    },
+    aboutFeature: {
+      ...Typography.body,
+      lineHeight: 24,
+      marginBottom: Spacing.sm,
+    },
+    aboutTech: {
+      ...Typography.body,
+      lineHeight: 24,
+      marginBottom: Spacing.sm,
+    },
+    aboutFooter: {
+      alignItems: 'center',
+      borderTopWidth: 1,
+      marginTop: Spacing.xl,
+      paddingTop: Spacing.lg,
+    },
+    aboutMadeWith: {
+      ...Typography.bodyLarge,
+      marginBottom: Spacing.xs,
+    },
+    aboutDeveloper: {
+      ...Typography.caption,
+    },
+  });
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
       {/* Header */}
@@ -232,7 +543,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         <Card style={styles.physicalParamsCard}>
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>
-              📊 Мои показатели
+              📊 {t('profile.sections.myStats')}
             </Text>
           </View>
 
@@ -282,7 +593,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
           <Card style={styles.metabolismCard}>
             <View style={styles.sectionHeaderRow}>
               <Text style={[styles.sectionTitleWithEmoji, { color: theme.text }]}>
-                🔥 Метаболизм
+                🔥 {t('profile.sections.metabolism')}
               </Text>
               <TouchableOpacity onPress={() => setShowMetabolismInfoModal(true)}>
                 <Ionicons name="information-circle-outline" size={24} color={theme.primary} />
@@ -321,7 +632,7 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         {/* Секция 3: Прогресс к цели */}
         {hasCompleteProfile && currentUser.targetWeight && (
           <ProgressCard
-            title="🎯 Прогресс к цели"
+            title={`🎯 ${t('profile.sections.progressToGoal')}`}
             current={currentUser.weight!}
             target={currentUser.targetWeight}
             unit="кг"
@@ -424,8 +735,30 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         <SettingItem
           icon="information-circle-outline"
           title={t('profile.appSettings.about')}
-          onPress={() => console.log('About')}
+          onPress={() => setShowAboutModal(true)}
         />
+
+        {/* Daily Tips Toggle */}
+        <View style={[styles.settingItem, { backgroundColor: theme.surface }]}>
+          <View style={styles.settingLeft}>
+            <Ionicons name="bulb-outline" size={24} color={theme.textSecondary} />
+            <View style={styles.settingTextContainer}>
+              <Text style={[styles.settingTitle, { color: theme.text }]}>
+                {t('profile.showDailyTips')}
+              </Text>
+              <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                {t('profile.showDailyTipsDesc')}
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={currentUser.showDailyTips ?? true}
+            onValueChange={handleToggleDailyTips}
+            disabled={loading}
+            trackColor={{ false: theme.disabled, true: theme.primary }}
+            thumbColor={theme.white}
+          />
+        </View>
 
         {/* Logout Button */}
         <View style={styles.logoutContainer}>
@@ -612,6 +945,95 @@ export default function ProfileScreen({ user, onLogout, onUserUpdate }: ProfileS
         visible={showMetabolismInfoModal}
         onClose={() => setShowMetabolismInfoModal(false)}
       />
+
+      {/* About Modal */}
+      <Modal
+        visible={showAboutModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAboutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.aboutModalContent, { backgroundColor: theme.surface }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
+                {t('profile.about.title')}
+              </Text>
+              <TouchableOpacity onPress={() => setShowAboutModal(false)}>
+                <Ionicons name="close" size={28} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.aboutSection}>
+                <Text style={[styles.aboutAppName, { color: theme.text }]}>
+                  {t('profile.about.appName')}
+                </Text>
+                <Text style={[styles.aboutTagline, { color: theme.textSecondary }]}>
+                  {t('profile.about.tagline')}
+                </Text>
+                <Text style={[styles.aboutVersion, { color: theme.disabled }]}>
+                  {t('profile.about.version')}
+                </Text>
+                <Text style={[styles.aboutDescription, { color: theme.text }]}>
+                  {t('profile.about.description')}
+                </Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={[styles.aboutSectionTitle, { color: theme.text }]}>
+                  {t('profile.about.features')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature1')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature2')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature3')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature4')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature5')}
+                </Text>
+                <Text style={[styles.aboutFeature, { color: theme.textSecondary }]}>
+                  {t('profile.about.feature6')}
+                </Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={[styles.aboutSectionTitle, { color: theme.text }]}>
+                  {t('profile.about.technologies')}
+                </Text>
+                <Text style={[styles.aboutTech, { color: theme.textSecondary }]}>
+                  • {t('profile.about.tech1')}
+                </Text>
+                <Text style={[styles.aboutTech, { color: theme.textSecondary }]}>
+                  • {t('profile.about.tech2')}
+                </Text>
+                <Text style={[styles.aboutTech, { color: theme.textSecondary }]}>
+                  • {t('profile.about.tech3')}
+                </Text>
+                <Text style={[styles.aboutTech, { color: theme.textSecondary }]}>
+                  • {t('profile.about.tech4')}
+                </Text>
+              </View>
+
+              <View style={[styles.aboutFooter, { borderTopColor: theme.border }]}>
+                <Text style={[styles.aboutMadeWith, { color: theme.text }]}>
+                  {t('profile.about.madeWith')}
+                </Text>
+                <Text style={[styles.aboutDeveloper, { color: theme.textSecondary }]}>
+                  {t('profile.about.developer')}
+                </Text>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -693,225 +1115,3 @@ function MetabolismRow({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    alignItems: 'center',
-    borderRadius: 40,
-    height: 80,
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-    width: 80,
-  },
-  avatarText: {
-    fontSize: 40,
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: Spacing.md,
-  },
-  header: {
-    borderBottomWidth: 1,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-  },
-  editHint: {
-    ...Typography.caption,
-    marginTop: Spacing.xs,
-  },
-  headerTitle: {
-    ...Typography.h3,
-  },
-  userEmail: {
-    ...Typography.body,
-  },
-  userInfo: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xl,
-  },
-  userName: {
-    ...Typography.h2,
-    marginBottom: Spacing.xs,
-  },
-  subscriptionCard: {
-    marginBottom: Spacing.lg,
-  },
-  premiumCard: {
-    backgroundColor: '#FFD700',
-  },
-  subscriptionHeader: {
-    marginBottom: Spacing.sm,
-  },
-  subscriptionType: {
-    ...Typography.h3,
-  },
-  subscriptionDescription: {
-    ...Typography.body,
-    marginBottom: Spacing.md,
-  },
-  upgradeButton: {
-    marginTop: Spacing.sm,
-  },
-  sectionTitle: {
-    ...Typography.h3,
-    marginBottom: Spacing.md,
-    marginTop: Spacing.lg,
-  },
-  settingItem: {
-    alignItems: 'center',
-    borderRadius: BorderRadius.medium,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-    padding: Spacing.md,
-  },
-  settingLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flex: 1,
-  },
-  settingTitle: {
-    ...Typography.bodyLarge,
-    marginLeft: Spacing.md,
-  },
-  settingRight: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  settingValue: {
-    ...Typography.body,
-    marginRight: Spacing.sm,
-  },
-  logoutContainer: {
-    marginBottom: Spacing.xxl,
-    marginTop: Spacing.xl,
-  },
-  // Modal styles
-  modalOverlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.large,
-    borderTopRightRadius: BorderRadius.large,
-    maxHeight: '50%',
-    padding: Spacing.lg,
-  },
-  modalHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
-  },
-  modalTitle: {
-    ...Typography.h2,
-  },
-  themeOption: {
-    alignItems: 'center',
-    borderColor: 'transparent',
-    borderRadius: BorderRadius.medium,
-    borderWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-    padding: Spacing.md,
-  },
-  themeOptionLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  themeOptionText: {
-    ...Typography.bodyLarge,
-    marginLeft: Spacing.md,
-  },
-  languageFlag: {
-    fontSize: 24,
-    marginRight: Spacing.xs,
-  },
-  // New styles for physical params and metabolism sections
-  physicalParamsCard: {
-    marginBottom: Spacing.lg,
-  },
-  metabolismCard: {
-    marginBottom: Spacing.lg,
-  },
-  sectionHeaderRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.md,
-  },
-  sectionTitleWithEmoji: {
-    ...Typography.h3,
-  },
-  statsGrid: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  statRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.sm,
-  },
-  statLabel: {
-    ...Typography.body,
-  },
-  statRight: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  statValue: {
-    ...Typography.bodyLarge,
-  },
-  badge: {
-    borderRadius: BorderRadius.small,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    ...Typography.caption,
-    fontWeight: '600',
-  },
-  editButton: {
-    marginTop: Spacing.sm,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: Spacing.lg,
-  },
-  emptyStateText: {
-    ...Typography.body,
-    marginBottom: Spacing.md,
-    textAlign: 'center',
-  },
-  fillButton: {
-    minWidth: 150,
-  },
-  metabolismStats: {
-    gap: Spacing.sm,
-  },
-  metabolismRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingVertical: Spacing.sm,
-  },
-  colorIndicator: {
-    borderRadius: 2,
-    height: 16,
-    marginRight: Spacing.md,
-    width: 4,
-  },
-  metabolismLabel: {
-    ...Typography.body,
-    flex: 1,
-  },
-  metabolismValue: {
-    ...Typography.bodyLarge,
-  },
-});

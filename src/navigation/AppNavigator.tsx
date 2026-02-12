@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { View } from 'react-native';
+import { View, Linking } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,14 +14,17 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Loading from '../components/Loading';
 import { useAuth } from '../config/AuthContext';
 import { STORAGE_KEYS } from '../config/constants';
+import { supabase } from '../config/supabase';
 import { Colors } from '../config/theme';
 import AuthScreen from '../screens/AuthScreen';
 import ChatScreen from '../screens/ChatScreen';
 import DiaryScreen from '../screens/DiaryScreen';
+import EmailConfirmationScreen from '../screens/EmailConfirmationScreen';
 import OnboardingQuestionnaire from '../screens/OnboardingQuestionnaire';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 // Services
 import analyticsService from '../services/analyticsService';
 
@@ -75,7 +78,7 @@ function MainTabs({
         </Tab.Screen>
 
         <Tab.Screen name="DiaryTab" options={{ tabBarLabel: 'Дневник' }}>
-          {() => <DiaryScreen userId={user.id} />}
+          {() => <DiaryScreen userId={user.id} user={user} />}
         </Tab.Screen>
 
         <Tab.Screen name="ProfileTab" options={{ tabBarLabel: 'Профиль' }}>
@@ -112,10 +115,86 @@ export default function AppNavigator() {
   const { user, loading, signOut, updateUser, refreshUser } = useAuth();
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   useEffect(() => {
     checkOnboardingState();
+    setupDeepLinking();
   }, []);
+
+  const setupDeepLinking = () => {
+    // Обработка deep links при запуске приложения
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        void handleDeepLink(url);
+      }
+    });
+
+    // Обработка deep links когда приложение уже запущено
+    const subscription = Linking.addEventListener('url', event => {
+      void handleDeepLink(event.url);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  };
+
+  const getDeepLinkParams = (url: string): URLSearchParams => {
+    const [basePart, hashPart = ''] = url.split('#');
+    const queryPart = basePart.includes('?') ? basePart.split('?')[1] : '';
+    const combined = [queryPart, hashPart].filter(Boolean).join('&');
+    return new URLSearchParams(combined);
+  };
+
+  const handleDeepLink = async (url: string) => {
+    console.log('Deep link received:', url);
+
+    const params = getDeepLinkParams(url);
+    const linkType = params.get('type');
+
+    // Fallback для старого custom path без query/hash
+    if (!linkType) {
+      if (url.includes('auth/confirmed')) {
+        setShowEmailConfirmation(true);
+      }
+      return;
+    }
+
+    if (linkType !== 'signup' && linkType !== 'recovery' && linkType !== 'magiclink') {
+      return;
+    }
+
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    if (!accessToken || !refreshToken) {
+      console.error('Auth link is missing access_token or refresh_token');
+      return;
+    }
+
+    const { error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (error) {
+      console.error('Failed to set auth session from link:', error);
+      return;
+    }
+
+    if (linkType === 'recovery') {
+      setShowResetPassword(true);
+      return;
+    }
+
+    if (linkType === 'signup') {
+      setShowEmailConfirmation(true);
+    }
+
+    await refreshUser();
+  };
 
   const checkOnboardingState = async () => {
     try {
@@ -168,7 +247,31 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isOnboardingComplete ? (
+        {showResetPassword ? (
+          <Stack.Screen name="ResetPassword">
+            {() => (
+              <ResetPasswordScreen
+                onSuccess={async () => {
+                  setShowResetPassword(false);
+                  await refreshUser();
+                }}
+                onClose={() => setShowResetPassword(false)}
+              />
+            )}
+          </Stack.Screen>
+        ) : showEmailConfirmation ? (
+          // Email подтверждение (показывается при переходе по ссылке из письма)
+          <Stack.Screen name="EmailConfirmation">
+            {() => (
+              <EmailConfirmationScreen
+                onSuccess={async () => {
+                  setShowEmailConfirmation(false);
+                  await refreshUser();
+                }}
+              />
+            )}
+          </Stack.Screen>
+        ) : !isOnboardingComplete ? (
           // Шаг 1: Приветственный экран (показывается только один раз)
           <Stack.Screen name="Onboarding">
             {() => (

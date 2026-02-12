@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подтвердите ваш email</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .content p {
+      color: #4a4a4a;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    .footer {
+      padding: 30px;
+      text-align: center;
+      background-color: #f9f9f9;
+      border-top: 1px solid #e0e0e0;
+    }
+    .footer p {
+      color: #888888;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .divider {
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 30px 0;
+    }
+    .info-box {
+      background-color: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .info-box p {
+      margin: 0;
+      color: #4a4a4a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🥗 Личный Диетолог</h1>
+    </div>
+
+    <div class="content">
+      <h2>Подтвердите ваш email</h2>
+
+      <p>Привет!</p>
+
+      <p>Спасибо за регистрацию в приложении <strong>Личный Диетолог</strong>. Мы рады видеть вас в нашем сообществе здорового питания!</p>
+
+      <p>Чтобы завершить регистрацию и начать пользоваться всеми возможностями приложения, пожалуйста, подтвердите ваш email адрес:</p>
+
+      <div style="text-align: center;">
+        <a href="{{ .ConfirmationURL }}" class="button">Подтвердить Email</a>
+      </div>
+
+      <div class="info-box">
+        <p><strong>💡 Что вас ждет после подтверждения:</strong></p>
+        <p>✓ Персональные рекомендации по питанию<br>
+        ✓ Отслеживание калорий и макронутриентов<br>
+        ✓ Анализ фотографий блюд с помощью AI<br>
+        ✓ Ежедневные советы по здоровому питанию</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <p style="font-size: 14px; color: #888888;">
+        Если кнопка не работает, скопируйте и вставьте эту ссылку в ваш браузер:
+      </p>
+      <p style="font-size: 13px; color: #667eea; word-break: break-all;">
+        {{ .ConfirmationURL }}
+      </p>
+
+      <p style="font-size: 14px; color: #888888; margin-top: 30px;">
+        Если вы не регистрировались в приложении Личный Диетолог, просто проигнорируйте это письмо.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p><strong>Личный Диетолог</strong></p>
+      <p>Ваш путь к здоровому питанию</p>
+      <p style="margin-top: 15px;">© 2026 Личный Диетолог. Все права защищены.</p>
+    </div>
+  </div>
+</body>
+</html>

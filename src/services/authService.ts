@@ -5,11 +5,26 @@
  * Управляет регистрацией, входом, выходом и профилем пользователя.
  */
 
+import { Platform } from 'react-native';
+
 import { supabase } from '../config/supabase';
 
 import type { User, AuthResponse, ApiError } from '../types';
 
 class AuthService {
+  /**
+   * Получить redirect URL для auth-flow в зависимости от платформы
+   */
+  private getAuthRedirectUrl(path: string): string {
+    const normalizedPath = path.replace(/^\/+/, '');
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return `${window.location.origin}/${normalizedPath}`;
+    }
+
+    return `yourapp://${normalizedPath}`;
+  }
+
   /**
    * Регистрация нового пользователя
    */
@@ -27,6 +42,13 @@ class AuthService {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          // URL для редиректа после подтверждения email
+          emailRedirectTo: this.getAuthRedirectUrl('auth/confirmed'),
+          data: {
+            full_name: name || '',
+          },
+        },
       });
 
       if (authError) throw authError;
@@ -34,8 +56,32 @@ class AuthService {
         throw this.createError('Не удалось создать пользователя', 'SIGNUP_FAILED');
       }
 
-      // Обновляем профиль с именем, если указано
-      if (name) {
+      // Даем время триггеру создать профиль (небольшая задержка)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Проверяем, создан ли профиль триггером
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', authData.user.id)
+        .single();
+
+      // Если профиль не создан триггером, создаем вручную
+      if (checkError || !existingProfile) {
+        console.warn('Profile not created by trigger, creating manually');
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            full_name: name || '',
+          });
+
+        if (insertError && !insertError.message.includes('duplicate key')) {
+          console.error('Failed to create profile:', insertError);
+          throw this.createError('Не удалось создать профиль пользователя', 'PROFILE_CREATION_FAILED');
+        }
+      } else if (name) {
+        // Обновляем профиль с именем, если указано
         const { error: updateError } = await supabase
           .from('users')
           .update({ full_name: name })
@@ -163,6 +209,14 @@ class AuthService {
         dbUpdates.target_calories = updates.dailyCalorieGoal;
       }
 
+      // Тип диеты и настройки советов
+      if (updates.dietType !== undefined) {
+        dbUpdates.diet_type = updates.dietType;
+      }
+      if (updates.showDailyTips !== undefined) {
+        dbUpdates.show_daily_tips = updates.showDailyTips;
+      }
+
       const { error } = await supabase.from('users').update(dbUpdates).eq('id', userId);
 
       if (error) throw error;
@@ -196,7 +250,7 @@ class AuthService {
   async resetPassword(email: string): Promise<void> {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'yourapp://reset-password',
+        redirectTo: this.getAuthRedirectUrl('reset-password'),
       });
 
       if (error) throw error;
@@ -228,7 +282,7 @@ class AuthService {
    * Слушатель изменения состояния авторизации
    */
   onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
+    return supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const user = await this.getUserProfile(session.user.id, session.user.email || '');
         callback(user);
@@ -268,6 +322,10 @@ class AuthService {
 
       // Калории
       dailyCalorieGoal: data.target_calories || 2000,
+
+      // Тип диеты и настройки советов
+      dietType: data.diet_type || undefined,
+      showDailyTips: data.show_daily_tips ?? true,
 
       createdAt: data.created_at,
     };

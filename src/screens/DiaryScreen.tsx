@@ -18,20 +18,24 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AddMealModal from '../components/AddMealModal';
+import DailyTipCard from '../components/DailyTipCard';
 import Loading from '../components/Loading';
 import MealCard from '../components/MealCard';
 import StatsCard from '../components/StatsCard';
 import { Typography, Spacing, Shadows } from '../config/theme';
 import { useTheme } from '../config/ThemeContext';
+import analyticsService from '../services/analyticsService';
 import diaryService from '../services/diaryService';
+import nutritionTipsService from '../services/nutritionTipsService';
 
-import type { DailyStats, FoodEntry } from '../types';
+import type { DailyStats, DailyTip, FoodEntry, User } from '../types';
 
 interface DiaryScreenProps {
   userId: string;
+  user: User;
 }
 
-export default function DiaryScreen({ userId }: DiaryScreenProps) {
+export default function DiaryScreen({ userId, user }: DiaryScreenProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [stats, setStats] = useState<DailyStats | null>(null);
@@ -40,6 +44,8 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [editingMeal, setEditingMeal] = useState<FoodEntry | null>(null);
+  const [dailyTip, setDailyTip] = useState<DailyTip | null>(null);
+  const [tipDismissed, setTipDismissed] = useState(false);
 
   const loadStats = async () => {
     try {
@@ -76,6 +82,16 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
   useEffect(() => {
     loadStats();
   }, [selectedDate]);
+
+  useEffect(() => {
+    const loadTip = async () => {
+      if (!tipDismissed) {
+        const tip = await nutritionTipsService.getDailyTip(user);
+        setDailyTip(tip);
+      }
+    };
+    loadTip();
+  }, [user, tipDismissed]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -133,6 +149,18 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
       await diaryService.addMeal(meal);
     }
     await loadStats();
+  };
+
+  const handleDismissTip = async () => {
+    if (dailyTip) {
+      await nutritionTipsService.dismissTip(userId, dailyTip.id);
+      analyticsService.track('daily_tip_dismissed', {
+        tipId: dailyTip.id,
+        category: dailyTip.category,
+      });
+      setTipDismissed(true);
+      setDailyTip(null);
+    }
   };
 
   if (loading && !stats) {
@@ -225,6 +253,9 @@ export default function DiaryScreen({ userId }: DiaryScreenProps) {
           />
         }
       >
+        {/* Daily Tip Card */}
+        {dailyTip && !tipDismissed && <DailyTipCard tip={dailyTip} onDismiss={handleDismissTip} />}
+
         {/* Stats Card */}
         {stats && <StatsCard stats={stats} />}
 

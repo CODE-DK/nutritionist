@@ -66,6 +66,9 @@ export default function PhotoCaptureModal({
       borderRadius: BorderRadius.large,
       maxHeight: '80%',
       width: '90%',
+      ...(Platform.OS === 'web' && {
+        maxWidth: 600,
+      }),
       ...Shadows.level3,
     },
     overlay: {

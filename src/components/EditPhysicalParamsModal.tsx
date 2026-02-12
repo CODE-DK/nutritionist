@@ -263,6 +263,11 @@ const styles = StyleSheet.create({
     borderTopRightRadius: BorderRadius.large,
     maxHeight: '85%',
     padding: Spacing.lg,
+    ...(Platform.OS === 'web' && {
+      maxWidth: 600,
+      alignSelf: 'center',
+      width: '100%',
+    }),
   },
   modalHeader: {
     alignItems: 'center',

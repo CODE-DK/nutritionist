@@ -5,7 +5,7 @@
  * для расчета персонализированной нормы калорий
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import {
   View,
@@ -33,14 +33,14 @@ import {
   getGoalTypeLabel,
 } from '../utils/calorieCalculator';
 
-import type { Gender, ActivityLevel, GoalType, User } from '../types';
+import type { Gender, ActivityLevel, GoalType, DietType, User } from '../types';
 
 interface OnboardingQuestionnaireProps {
   user: User;
   onComplete: (updatedUser: User) => void;
 }
 
-type Step = 'gender_age' | 'height_weight' | 'goal' | 'activity' | 'target_weight' | 'summary';
+type Step = 'gender_age' | 'height_weight' | 'goal' | 'activity' | 'diet' | 'target_weight' | 'summary';
 
 export default function OnboardingQuestionnaire({
   user,
@@ -58,16 +58,77 @@ export default function OnboardingQuestionnaire({
   const [weight, setWeight] = useState('');
   const [goalType, setGoalType] = useState<GoalType | null>(null);
   const [activityLevel, setActivityLevel] = useState<ActivityLevel | null>(null);
+  const [dietType, setDietType] = useState<DietType | null>(null);
   const [targetWeight, setTargetWeight] = useState('');
 
-  const totalSteps = 5;
+  // Валидация ввода
+  const handleAgeChange = (text: string) => {
+    // Только цифры
+    const filtered = text.replace(/[^0-9]/g, '');
+    setAge(filtered);
+  };
+
+  const handleHeightChange = (text: string) => {
+    // Только цифры
+    const filtered = text.replace(/[^0-9]/g, '');
+    setHeight(filtered);
+  };
+
+  const handleWeightChange = (text: string) => {
+    // Только цифры и одна точка
+    let filtered = text.replace(/[^0-9.]/g, '');
+
+    // Запрещаем точку в начале
+    if (filtered.startsWith('.')) {
+      return;
+    }
+
+    // Проверяем, что точка только одна
+    const parts = filtered.split('.');
+    if (parts.length > 2) {
+      return;
+    }
+
+    // Ограничиваем одним знаком после точки
+    if (parts.length === 2 && parts[0] && parts[1] && parts[1].length > 1) {
+      filtered = parts[0] + '.' + parts[1].slice(0, 1);
+    }
+
+    setWeight(filtered);
+  };
+
+  const handleTargetWeightChange = (text: string) => {
+    // Только цифры и одна точка
+    let filtered = text.replace(/[^0-9.]/g, '');
+
+    // Запрещаем точку в начале
+    if (filtered.startsWith('.')) {
+      return;
+    }
+
+    // Проверяем, что точка только одна
+    const parts = filtered.split('.');
+    if (parts.length > 2) {
+      return;
+    }
+
+    // Ограничиваем одним знаком после точки
+    if (parts.length === 2 && parts[0] && parts[1] && parts[1].length > 1) {
+      filtered = parts[0] + '.' + parts[1].slice(0, 1);
+    }
+
+    setTargetWeight(filtered);
+  };
+
+  const totalSteps = 6;
   const currentStepNumber = {
     gender_age: 1,
     height_weight: 2,
     goal: 3,
     activity: 4,
-    target_weight: 5,
-    summary: 5,
+    diet: 5,
+    target_weight: 6,
+    summary: 6,
   }[currentStep];
 
   const handleNext = () => {
@@ -94,6 +155,12 @@ export default function OnboardingQuestionnaire({
     } else if (currentStep === 'activity') {
       if (!activityLevel) {
         Alert.alert(t('common.error'), t('diary.addMealModal.invalidValues'));
+        return;
+      }
+      setCurrentStep('diet');
+    } else if (currentStep === 'diet') {
+      if (!dietType) {
+        Alert.alert(t('common.error'), t('profile.editModals.selectGoal'));
         return;
       }
       // Если цель - похудение или набор, спрашиваем целевой вес
@@ -127,18 +194,19 @@ export default function OnboardingQuestionnaire({
     if (currentStep === 'height_weight') setCurrentStep('gender_age');
     else if (currentStep === 'goal') setCurrentStep('height_weight');
     else if (currentStep === 'activity') setCurrentStep('goal');
-    else if (currentStep === 'target_weight') setCurrentStep('activity');
+    else if (currentStep === 'diet') setCurrentStep('activity');
+    else if (currentStep === 'target_weight') setCurrentStep('diet');
     else if (currentStep === 'summary') {
       if (goalType === 'lose_weight' || goalType === 'gain_weight') {
         setCurrentStep('target_weight');
       } else {
-        setCurrentStep('activity');
+        setCurrentStep('diet');
       }
     }
   };
 
   const handleComplete = async () => {
-    if (!gender || !age || !height || !weight || !goalType || !activityLevel) {
+    if (!gender || !age || !height || !weight || !goalType || !activityLevel || !dietType) {
       Alert.alert(t('common.error'), t('diary.addMealModal.invalidValues'));
       return;
     }
@@ -164,6 +232,7 @@ export default function OnboardingQuestionnaire({
         weight: parseFloat(weight),
         goalType,
         activityLevel,
+        dietType,
         targetWeight: parseFloat(targetWeight),
         dailyCalorieGoal: targetCalories,
       });
@@ -173,6 +242,7 @@ export default function OnboardingQuestionnaire({
         age: parseInt(age),
         goalType,
         activityLevel,
+        dietType,
         targetCalories,
       });
 
@@ -201,12 +271,12 @@ export default function OnboardingQuestionnaire({
 
   const renderGenderAgeStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('profile.user')}</Text>
+      <Text style={[styles.stepTitle, { color: theme.text }]}>{t('onboarding.genderAge')}</Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
         {t('profile.editModals.basedOnProfile')}
       </Text>
 
-      <Text style={[styles.label, { color: theme.text }]}>{t('profile.user')}</Text>
+      <Text style={[styles.label, { color: theme.text }]}>{t('onboarding.gender')}</Text>
       <View style={styles.genderContainer}>
         <TouchableOpacity
           style={[
@@ -217,7 +287,7 @@ export default function OnboardingQuestionnaire({
           onPress={() => setGender('male')}
         >
           <Text style={styles.genderEmoji}>👨</Text>
-          <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
+          <Text style={[styles.genderText, { color: theme.text }]}>{t('onboarding.male')}</Text>
           {gender === 'male' && (
             <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
           )}
@@ -232,24 +302,24 @@ export default function OnboardingQuestionnaire({
           onPress={() => setGender('female')}
         >
           <Text style={styles.genderEmoji}>👩</Text>
-          <Text style={[styles.genderText, { color: theme.text }]}>{t('profile.user')}</Text>
+          <Text style={[styles.genderText, { color: theme.text }]}>{t('onboarding.female')}</Text>
           {gender === 'female' && (
             <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
           )}
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.label, { color: theme.text }]}>{t('profile.user')}</Text>
+      <Text style={[styles.label, { color: theme.text }]}>{t('onboarding.age')}</Text>
       <TextInput
         style={[
           styles.input,
           { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border },
         ]}
-        placeholder={t('diary.addMealModal.enterMealName')}
+        placeholder="25"
         placeholderTextColor={theme.disabled}
         keyboardType="number-pad"
         value={age}
-        onChangeText={setAge}
+        onChangeText={handleAgeChange}
         maxLength={3}
       />
     </View>
@@ -258,14 +328,14 @@ export default function OnboardingQuestionnaire({
   const renderHeightWeightStep = () => (
     <View style={styles.stepContainer}>
       <Text style={[styles.stepTitle, { color: theme.text }]}>
-        {t('profile.goalSettings.targetWeight')}
+        {t('onboarding.heightWeightTitle')}
       </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
-        {t('profile.editModals.currentWeight', { weight: 0 })}
+        {t('onboarding.heightWeightDesc')}
       </Text>
 
       <Text style={[styles.label, { color: theme.text }]}>
-        {t('profile.goalSettings.targetWeight')}
+        {t('onboarding.height')}
       </Text>
       <TextInput
         style={[
@@ -276,12 +346,12 @@ export default function OnboardingQuestionnaire({
         placeholderTextColor={theme.disabled}
         keyboardType="number-pad"
         value={height}
-        onChangeText={setHeight}
+        onChangeText={handleHeightChange}
         maxLength={3}
       />
 
       <Text style={[styles.label, { color: theme.text }]}>
-        {t('profile.editModals.currentWeight', { weight: '' })}
+        {t('onboarding.weight')}
       </Text>
       <TextInput
         style={[
@@ -292,7 +362,7 @@ export default function OnboardingQuestionnaire({
         placeholderTextColor={theme.disabled}
         keyboardType="decimal-pad"
         value={weight}
-        onChangeText={setWeight}
+        onChangeText={handleWeightChange}
         maxLength={5}
       />
     </View>
@@ -382,10 +452,10 @@ export default function OnboardingQuestionnaire({
   const renderActivityStep = () => (
     <View style={styles.stepContainer}>
       <Text style={[styles.stepTitle, { color: theme.text }]}>
-        {t('profile.goalSettings.goal')}
+        {t('onboarding.activityTitle')}
       </Text>
       <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
-        {t('profile.editModals.selectGoal')}
+        {t('onboarding.activityDesc')}
       </Text>
 
       {(['sedentary', 'light', 'moderate', 'active', 'very_active'] as ActivityLevel[]).map(
@@ -413,6 +483,107 @@ export default function OnboardingQuestionnaire({
     </View>
   );
 
+  const renderDietStep = () => {
+    const dietOptions: Array<{ type: DietType; emoji: string; title: string; subtitle: string }> = [
+      {
+        type: 'balanced',
+        emoji: '🍽️',
+        title: t('dietTypes.balanced.title'),
+        subtitle: t('dietTypes.balanced.subtitle'),
+      },
+      {
+        type: 'calorie_deficit',
+        emoji: '📉',
+        title: t('dietTypes.calorie_deficit.title'),
+        subtitle: t('dietTypes.calorie_deficit.subtitle'),
+      },
+      {
+        type: 'keto',
+        emoji: '🥑',
+        title: t('dietTypes.keto.title'),
+        subtitle: t('dietTypes.keto.subtitle'),
+      },
+      {
+        type: 'low_carb',
+        emoji: '🥦',
+        title: t('dietTypes.low_carb.title'),
+        subtitle: t('dietTypes.low_carb.subtitle'),
+      },
+      {
+        type: 'high_protein',
+        emoji: '💪',
+        title: t('dietTypes.high_protein.title'),
+        subtitle: t('dietTypes.high_protein.subtitle'),
+      },
+      {
+        type: 'mediterranean',
+        emoji: '🫒',
+        title: t('dietTypes.mediterranean.title'),
+        subtitle: t('dietTypes.mediterranean.subtitle'),
+      },
+      {
+        type: 'intermittent_fasting',
+        emoji: '⏰',
+        title: t('dietTypes.intermittent_fasting.title'),
+        subtitle: t('dietTypes.intermittent_fasting.subtitle'),
+      },
+      {
+        type: 'paleo',
+        emoji: '🍖',
+        title: t('dietTypes.paleo.title'),
+        subtitle: t('dietTypes.paleo.subtitle'),
+      },
+      {
+        type: 'vegan',
+        emoji: '🌱',
+        title: t('dietTypes.vegan.title'),
+        subtitle: t('dietTypes.vegan.subtitle'),
+      },
+      {
+        type: 'vegetarian',
+        emoji: '🥗',
+        title: t('dietTypes.vegetarian.title'),
+        subtitle: t('dietTypes.vegetarian.subtitle'),
+      },
+    ];
+
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.text }]}>
+          {t('onboarding.selectDiet')}
+        </Text>
+        <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+          {t('onboarding.selectDietDesc')}
+        </Text>
+
+        {dietOptions.map(option => (
+          <TouchableOpacity
+            key={option.type}
+            style={[
+              styles.goalOption,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+              dietType === option.type && { borderColor: theme.primary, borderWidth: 2 },
+            ]}
+            onPress={() => setDietType(option.type)}
+          >
+            <View style={styles.goalLeft}>
+              <Text style={styles.goalEmoji}>{option.emoji}</Text>
+              <View>
+                <Text style={[styles.goalTitle, { color: theme.text }]}>{option.title}</Text>
+                <Text style={[styles.goalSubtitle, { color: theme.textSecondary }]}>
+                  {option.subtitle}
+                </Text>
+              </View>
+            </View>
+            {dietType === option.type && (
+              <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   const renderTargetWeightStep = () => (
     <View style={styles.stepContainer}>
       <Text style={[styles.stepTitle, { color: theme.text }]}>
@@ -424,10 +595,10 @@ export default function OnboardingQuestionnaire({
 
       <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
         <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
-          {t('profile.editModals.currentWeight', { weight: '' })}
+          {t('onboarding.weight')}
         </Text>
         <Text style={[styles.summaryValue, { color: theme.text }]}>
-          {weight} {t('diary.calories')}
+          {weight} кг
         </Text>
       </View>
 
@@ -447,7 +618,7 @@ export default function OnboardingQuestionnaire({
         placeholderTextColor={theme.disabled}
         keyboardType="decimal-pad"
         value={targetWeight}
-        onChangeText={setTargetWeight}
+        onChangeText={handleTargetWeightChange}
         maxLength={5}
       />
     </View>
@@ -521,6 +692,7 @@ export default function OnboardingQuestionnaire({
         {currentStep === 'height_weight' && renderHeightWeightStep()}
         {currentStep === 'goal' && renderGoalStep()}
         {currentStep === 'activity' && renderActivityStep()}
+        {currentStep === 'diet' && renderDietStep()}
         {currentStep === 'target_weight' && renderTargetWeightStep()}
         {currentStep === 'summary' && renderSummaryStep()}
       </ScrollView>
@@ -573,6 +745,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.md,
     padding: Spacing.xl,
+    paddingVertical: Spacing.xl * 1.5,
   },
   calorieLabel: {
     ...Typography.bodyLarge,
@@ -580,6 +753,7 @@ const styles = StyleSheet.create({
   calorieValue: {
     ...Typography.h1,
     fontSize: 48,
+    lineHeight: 56,
   },
   container: {
     flex: 1,

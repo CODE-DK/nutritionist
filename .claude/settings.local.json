@@ -10,7 +10,9 @@
       "Bash(node:*)",
       "Bash(supabase:*)",
       "Bash(pnpm:*)",
-      "Bash(watchman:*)"
+      "Bash(watchman:*)",
+      "Bash(npx supabase:*)",
+      "Bash(pkill:*)"
     ]
   }
 }

@@ -29,6 +29,57 @@ export default {
       very_active: 'Very High Activity (2+ times/day)',
     },
 
+    // Diet types
+    dietTypes: {
+      balanced: {
+        title: 'Balanced Diet',
+        subtitle: 'For maintaining health',
+      },
+      calorie_deficit: {
+        title: 'Calorie Deficit',
+        subtitle: 'For weight loss',
+      },
+      keto: {
+        title: 'Keto Diet',
+        subtitle: 'For rapid weight loss',
+      },
+      low_carb: {
+        title: 'Low Carb',
+        subtitle: 'Reduced carbohydrates',
+      },
+      high_protein: {
+        title: 'High Protein',
+        subtitle: 'For muscle growth',
+      },
+      mediterranean: {
+        title: 'Mediterranean',
+        subtitle: 'Heart-healthy diet',
+      },
+      intermittent_fasting: {
+        title: 'Intermittent Fasting',
+        subtitle: 'Time-restricted eating',
+      },
+      paleo: {
+        title: 'Paleo',
+        subtitle: 'Natural whole foods',
+      },
+      vegan: {
+        title: 'Vegan',
+        subtitle: 'Plant-based diet',
+      },
+      vegetarian: {
+        title: 'Vegetarian',
+        subtitle: 'No meat, includes dairy',
+      },
+    },
+
+    // Daily tips
+    tips: {
+      dailyTip: 'Daily Tip',
+      gotIt: 'Got it',
+      learnMore: 'Learn more',
+    },
+
     // Auth
     auth: {
       welcome: 'Welcome',
@@ -36,14 +87,20 @@ export default {
       signUp: 'Sign Up',
       email: 'Email',
       password: 'Password',
+      confirmPassword: 'Confirm Password',
       signInButton: 'Sign In',
       signUpButton: 'Sign Up',
       alreadyHaveAccount: 'Already have an account?',
       dontHaveAccount: "Don't have an account?",
       invalidEmail: 'Invalid email format',
       passwordTooShort: 'Password must be at least 6 characters',
+      passwordsDoNotMatch: 'Passwords do not match',
       signInError: 'Sign in error',
       signUpError: 'Sign up error',
+      confirmEmailTitle: 'Check Your Email',
+      confirmEmailMessage:
+        'We sent a confirmation email to {{email}}.\n\nPlease check your inbox and click the link to activate your account.\n\nAfter confirmation, you can sign in to the app.',
+      confirmEmailButton: 'Got It',
     },
 
     // Chat
@@ -101,6 +158,19 @@ export default {
       skip: 'Skip',
       next: 'Next',
       getStarted: 'Get Started',
+      selectDiet: 'Choose Your Diet Type',
+      selectDietDesc: 'We will provide personalized nutrition tips based on your choice',
+      genderAge: 'Gender and Age',
+      gender: 'Gender',
+      male: 'Male',
+      female: 'Female',
+      age: 'Age',
+      height: 'Height (cm)',
+      weight: 'Weight (kg)',
+      heightWeightTitle: 'Height and Weight',
+      heightWeightDesc: 'This data is needed to calculate your calorie requirements',
+      activityTitle: 'Activity Level',
+      activityDesc: 'Select your physical activity level',
       features: {
         aiChat: 'AI nutrition consultations',
         photoRecognition: '📸 Food recognition by photo',
@@ -126,6 +196,35 @@ export default {
       sections: {
         goalSettings: 'Goal Settings',
         appSettings: 'Application',
+        myStats: 'My Stats',
+        metabolism: 'Metabolism',
+        progressToGoal: 'Progress to Goal',
+      },
+
+      stats: {
+        currentWeight: 'Current Weight',
+        targetWeight: 'Target Weight',
+        height: 'Height',
+        age: 'Age',
+        gender: 'Gender',
+        male: 'Male',
+        female: 'Female',
+        edit: 'Edit',
+        fillPrompt: 'Fill in physical parameters to calculate metabolism',
+        fill: 'Fill',
+        kg: 'kg',
+        cm: 'cm',
+        years: 'years old',
+      },
+
+      metabolism: {
+        bmr: 'BMR (basal)',
+        tdee: 'TDEE (with activity)',
+        yourTarget: 'Your target',
+        deficit: 'deficit',
+        surplus: 'surplus',
+        kcalPerDay: 'kcal/day',
+        kcal: 'kcal',
       },
 
       goalSettings: {
@@ -144,6 +243,31 @@ export default {
         language: 'Language',
         about: 'About',
       },
+
+      about: {
+        title: 'About',
+        appName: '🥗 Personal Dietitian',
+        tagline: 'AI-powered nutrition management assistant',
+        version: 'Version 1.0.0',
+        description: 'Your smart companion in achieving nutrition goals. We use cutting-edge artificial intelligence for personalized recommendations.',
+        features: 'Key Features:',
+        feature1: '🤖 AI dietitian consultations powered by GPT-4',
+        feature2: '📸 Instant food recognition from photos',
+        feature3: '📊 Smart calorie and macro tracking',
+        feature4: '🎯 Personal goals and progress',
+        feature5: '💡 Daily nutrition tips',
+        feature6: '🌍 Support for Russian and English',
+        technologies: 'Technologies:',
+        tech1: 'React Native + Expo',
+        tech2: 'OpenAI GPT-4 (AI chat)',
+        tech3: 'Claude 3.5 Sonnet (photo recognition)',
+        tech4: 'Supabase (database)',
+        madeWith: 'Made with ❤️',
+        developer: 'Solo developer + AI assistance',
+      },
+
+      showDailyTips: 'Daily Tips',
+      showDailyTipsDesc: 'Show daily nutrition tips',
 
       theme: {
         selectTheme: 'Select Theme',

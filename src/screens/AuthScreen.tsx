@@ -32,10 +32,15 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const validateForm = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
 
     if (!email || !email.includes('@')) {
       newErrors.email = t('auth.invalidEmail');
@@ -43,6 +48,15 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
     if (!password || password.length < 6) {
       newErrors.password = t('auth.passwordTooShort');
+    }
+
+    // Валидация подтверждения пароля только при регистрации
+    if (!isLogin) {
+      if (!confirmPassword) {
+        newErrors.confirmPassword = t('auth.passwordTooShort');
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = t('auth.passwordsDoNotMatch');
+      }
     }
 
     setErrors(newErrors);
@@ -57,11 +71,28 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
     try {
       if (isLogin) {
         await signIn(email, password);
+        // При входе сразу переходим в приложение
+        onAuthSuccess();
       } else {
         await signUp(email, password);
+        // После регистрации показываем сообщение о проверке email
+        Alert.alert(
+          t('auth.confirmEmailTitle'),
+          t('auth.confirmEmailMessage', { email }),
+          [
+            {
+              text: t('auth.confirmEmailButton'),
+              onPress: () => {
+                // Переключаем на режим входа и очищаем поля
+                setIsLogin(true);
+                setPassword('');
+                setConfirmPassword('');
+                setErrors({});
+              },
+            },
+          ]
+        );
       }
-
-      onAuthSuccess();
     } catch (error: any) {
       const errorTitle = isLogin ? t('auth.signInError') : t('auth.signUpError');
       Alert.alert(t('common.error'), error.message || errorTitle);
@@ -71,6 +102,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setErrors({});
+    setConfirmPassword(''); // Очищаем подтверждение пароля при переключении
   };
 
   const styles = StyleSheet.create({
@@ -172,6 +204,19 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
               autoCapitalize="none"
               error={errors.password}
             />
+
+            {/* Поле подтверждения пароля только при регистрации */}
+            {!isLogin && (
+              <Input
+                label={t('auth.confirmPassword')}
+                placeholder={t('auth.passwordTooShort')}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                error={errors.confirmPassword}
+              />
+            )}
 
             <Button
               title={isLogin ? t('auth.signInButton') : t('auth.signUpButton')}

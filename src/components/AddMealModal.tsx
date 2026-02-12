@@ -130,6 +130,11 @@ export default function AddMealModal({
       borderTopLeftRadius: BorderRadius.large,
       borderTopRightRadius: BorderRadius.large,
       maxHeight: '90%',
+      ...(Platform.OS === 'web' && {
+        maxWidth: 600,
+        alignSelf: 'center',
+        width: '100%',
+      }),
       ...Shadows.level3,
     },
     overlay: {

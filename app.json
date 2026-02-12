@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "scheme": "yourapp",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#4CAF50"
@@ -14,10 +15,27 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.dietitian.app"
+      "bundleIdentifier": "com.dietitian.app",
+      "associatedDomains": ["applinks:yourdomain.com"]
     },
     "android": {
-      "package": "com.dietitian.app"
+      "package": "com.dietitian.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "yourdomain.com"
+            },
+            {
+              "scheme": "yourapp"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-font"

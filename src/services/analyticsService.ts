@@ -13,6 +13,7 @@ type EventName =
   | 'user_logged_out'
   | 'onboarding_started'
   | 'onboarding_completed'
+  | 'onboarding_questionnaire_completed'
   | 'onboarding_skipped'
   | 'ai_message_sent'
   | 'ai_response_received'
@@ -26,7 +27,11 @@ type EventName =
   | 'paywall_dismissed'
   | 'profile_viewed'
   | 'profile_edited'
-  | 'theme_changed';
+  | 'theme_changed'
+  | 'daily_tip_viewed'
+  | 'daily_tip_dismissed'
+  | 'daily_tips_enabled'
+  | 'daily_tips_disabled';
 
 type EventProperties = Record<string, string | number | boolean>;
 
